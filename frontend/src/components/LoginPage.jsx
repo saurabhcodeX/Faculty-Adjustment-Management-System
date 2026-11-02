@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import {
   AlertCircle,
-  Calendar,
   Eye,
   EyeOff,
   GraduationCap,
@@ -11,13 +10,11 @@ import {
   Mail,
   School,
   Shield,
-  ShieldCheck,
-  Users,
 } from 'lucide-react';
 import './LoginPage.css';
 
 /* ═══════════════════════════════════════════════════════════════
-   CONFIGURATION — all static text lives here
+   CONFIGURATION
    ═══════════════════════════════════════════════════════════════ */
 
 const BRAND = {
@@ -44,12 +41,6 @@ const ROLES = [
     gradient: 'linear-gradient(135deg, #0c4a6e, #0891b2)',
     submitText: 'Sign in as Faculty',
   },
-];
-
-const PILLS = [
-  { Icon: Users, text: 'Smart Substitute Matching' },
-  { Icon: Calendar, text: '8-Period Timetable Automation' },
-  { Icon: ShieldCheck, text: 'Secure Role-Based Access' },
 ];
 
 const FORGOT_MSG =
@@ -95,7 +86,6 @@ export default function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [logoFailed, setLogoFailed] = useState(false);
 
   const active = ROLES[role];
 
@@ -125,200 +115,205 @@ export default function LoginPage() {
   /* ── Render ── */
   return (
     <div className="lg-root">
-      {/* (a) Background image + zoom */}
-      <div className="lg-bg" />
-
-      {/* (b) Dark overlay */}
-      <div className="lg-overlay" />
-
-      {/* (c) Glow blobs */}
-      <div className="lg-glow lg-glow--blue" />
-      <div className="lg-glow lg-glow--amber" />
+      {/* Background clouds */}
+      <div className="lg-bg-clouds">
+        <div className="lg-cloud lg-cloud--1" />
+        <div className="lg-cloud lg-cloud--2" />
+        <div className="lg-cloud lg-cloud--3" />
+      </div>
 
       {/* Content */}
       <div className="lg-content">
-        {/* ── 1. Header ── */}
-        <header className="lg-header">
-          <div className="lg-header-mark">
-            <School size={18} strokeWidth={2} />
-          </div>
-          <span className="lg-header-text">{BRAND.university}</span>
-        </header>
-
-        {/* ── 2. Center card ── */}
+        {/* ── THE CARD ── */}
         <main className="lg-card">
-          {/* Logo */}
-          <div className="lg-logo-wrap">
-            {logoFailed ? (
-              <div className="lg-logo-fallback">
-                <School size={32} strokeWidth={1.6} />
-              </div>
-            ) : (
-              <img
-                src="/logo.png"
-                alt={`${BRAND.university} logo`}
-                className="lg-logo-img"
-                width={68}
-                height={68}
-                onError={() => setLogoFailed(true)}
-              />
-            )}
-          </div>
 
-          {/* Title + tagline */}
-          <h1 className="lg-title">{BRAND.system}</h1>
-          <p className="lg-tagline">{BRAND.tagline}</p>
-
-          {/* Role tabs */}
-          <div className="lg-tabs-track" role="tablist" aria-label="Login role">
-            {ROLES.map((r, i) => (
-              <button
-                key={r.key}
-                role="tab"
-                type="button"
-                className={`lg-tab ${i === role ? 'lg-tab--active' : ''}`}
-                aria-pressed={i === role}
-                aria-selected={i === role}
-                onClick={() => { setRole(i); setError(''); setForgotOpen(false); }}
-              >
-                <r.Icon size={15} strokeWidth={2} />
-                <span>{r.label}</span>
-              </button>
-            ))}
-          </div>
-          <p className="lg-role-desc">{active.desc}</p>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="lg-form" noValidate>
-            {/* Email */}
-            <div className="lg-field">
-              <label htmlFor="lg-email" className="lg-label">
-                Email Address
-              </label>
-              <div className="lg-input-wrap">
-                <span className="lg-input-icon" aria-hidden="true">
-                  <Mail size={17} />
-                </span>
-                <input
-                  id="lg-email"
-                  type="email"
-                  className="lg-input"
-                  placeholder="name@college.edu"
-                  autoComplete="username"
-                  autoFocus
-                  required
-                  aria-required="true"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
+          {/* ── Scenic illustration header (pure CSS) ── */}
+          <div className="lg-scene">
+            {/* Stars */}
+            <div className="lg-stars">
+              <div className="lg-star" />
+              <div className="lg-star" />
+              <div className="lg-star" />
+              <div className="lg-star" />
+              <div className="lg-star" />
+              <div className="lg-star" />
+              <div className="lg-star" />
             </div>
 
-            {/* Password */}
-            <div className="lg-field">
-              <label htmlFor="lg-password" className="lg-label">
-                Password
-              </label>
-              <div className="lg-input-wrap">
-                <span className="lg-input-icon" aria-hidden="true">
-                  <Lock size={17} />
-                </span>
-                <input
-                  id="lg-password"
-                  type={showPw ? 'text' : 'password'}
-                  className="lg-input lg-input--pw"
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  required
-                  aria-required="true"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  onKeyDown={detectCaps}
-                  onKeyUp={detectCaps}
-                />
+            {/* Moon */}
+            <div className="lg-moon" />
+
+            {/* Clouds inside scene */}
+            <div className="lg-scene-cloud lg-scene-cloud--1" />
+            <div className="lg-scene-cloud lg-scene-cloud--2" />
+
+            {/* Shooting star */}
+            <div className="lg-shooting-star" />
+
+            {/* Mountains */}
+            <div className="lg-mountains">
+              <div className="lg-mtn lg-mtn--b1" />
+              <div className="lg-mtn lg-mtn--b2" />
+              <div className="lg-mtn lg-mtn--b3" />
+              <div className="lg-mtn lg-mtn--b4" />
+              <div className="lg-mtn lg-mtn--f1" />
+              <div className="lg-mtn lg-mtn--f2" />
+              <div className="lg-mtn lg-mtn--f3" />
+              <div className="lg-water" />
+            </div>
+          </div>
+
+          {/* ── Form section ── */}
+          <div className="lg-form-section">
+            {/* Role tabs */}
+            <div className="lg-tabs-track" role="tablist" aria-label="Login role">
+              {ROLES.map((r, i) => (
+                <button
+                  key={r.key}
+                  role="tab"
+                  type="button"
+                  className={`lg-tab ${i === role ? 'lg-tab--active' : ''}`}
+                  aria-pressed={i === role}
+                  aria-selected={i === role}
+                  onClick={() => { setRole(i); setError(''); setForgotOpen(false); }}
+                >
+                  <r.Icon size={15} strokeWidth={2} />
+                  <span>{r.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="lg-form" noValidate>
+              {/* Email */}
+              <div className="lg-field">
+                <label htmlFor="lg-email" className="lg-label">
+                  Email Address
+                </label>
+                <div className="lg-input-wrap">
+                  <span className="lg-input-icon" aria-hidden="true">
+                    <Mail size={17} />
+                  </span>
+                  <input
+                    id="lg-email"
+                    type="email"
+                    className="lg-input"
+                    placeholder="Email Address"
+                    autoComplete="username"
+                    autoFocus
+                    required
+                    aria-required="true"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="lg-field">
+                <label htmlFor="lg-password" className="lg-label">
+                  Password
+                </label>
+                <div className="lg-input-wrap">
+                  <span className="lg-input-icon" aria-hidden="true">
+                    <Lock size={17} />
+                  </span>
+                  <input
+                    id="lg-password"
+                    type={showPw ? 'text' : 'password'}
+                    className="lg-input lg-input--pw"
+                    placeholder="Password"
+                    autoComplete="current-password"
+                    required
+                    aria-required="true"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onKeyDown={detectCaps}
+                    onKeyUp={detectCaps}
+                  />
+                  <button
+                    type="button"
+                    className="lg-pw-toggle"
+                    aria-label={showPw ? 'Hide password' : 'Show password'}
+                    onClick={() => setShowPw((v) => !v)}
+                  >
+                    {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
+                {capsLock && (
+                  <p className="lg-caps-warn" aria-live="polite">
+                    ⚠ Caps Lock is on
+                  </p>
+                )}
+              </div>
+
+              {/* Submit */}
+              <button
+                type="submit"
+                className="lg-submit"
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 size={18} className="lg-spinner" />
+                    <span>Signing in…</span>
+                  </>
+                ) : (
+                  <span>LOGIN</span>
+                )}
+              </button>
+
+              {/* Forgot password */}
+              <div className="lg-extras">
+                <label className="lg-remember">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => {
+                      setRemember(e.target.checked);
+                      if (!e.target.checked) writeRemembered('');
+                    }}
+                  />
+                  <span>Remember me</span>
+                </label>
                 <button
                   type="button"
-                  className="lg-pw-toggle"
-                  aria-label={showPw ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowPw((v) => !v)}
+                  className="lg-forgot-btn"
+                  onClick={() => setForgotOpen((v) => !v)}
                 >
-                  {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+                  Forgot Password?
                 </button>
               </div>
-              {capsLock && (
-                <p className="lg-caps-warn" aria-live="polite">
-                  ⚠ Caps Lock is on
-                </p>
+
+              {/* Forgot info box */}
+              {forgotOpen && (
+                <div className="lg-forgot-msg" role="status">
+                  {FORGOT_MSG}
+                </div>
               )}
-            </div>
 
-            {/* Extras row */}
-            <div className="lg-extras">
-              <label className="lg-remember">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => {
-                    setRemember(e.target.checked);
-                    if (!e.target.checked) writeRemembered('');
-                  }}
-                />
-                <span>Remember my email</span>
-              </label>
-              <button
-                type="button"
-                className="lg-forgot-btn"
-                onClick={() => setForgotOpen((v) => !v)}
-              >
-                Forgot password?
-              </button>
-            </div>
-
-            {/* Forgot info box */}
-            {forgotOpen && (
-              <div className="lg-forgot-msg" role="status">
-                {FORGOT_MSG}
-              </div>
-            )}
-
-            {/* Error */}
-            {error && (
-              <div className="lg-error" role="alert">
-                <AlertCircle size={16} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* Submit */}
-            <button
-              type="submit"
-              className="lg-submit"
-              disabled={submitting}
-              style={{ background: active.gradient }}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 size={18} className="lg-spinner" />
-                  <span>Signing in…</span>
-                </>
-              ) : (
-                <span>{active.submitText}</span>
+              {/* Error */}
+              {error && (
+                <div className="lg-error" role="alert">
+                  <AlertCircle size={16} />
+                  <span>{error}</span>
+                </div>
               )}
-            </button>
-          </form>
+            </form>
+          </div>
+
+          {/* ── Welcome section (bottom of card) ── */}
+          <div className="lg-welcome">
+            <h1 className="lg-welcome-title">WELCOME</h1>
+            <p className="lg-welcome-sub">{BRAND.tagline}</p>
+            <div className="lg-welcome-brand">
+              <School size={14} strokeWidth={2} />
+              <span>{BRAND.system}</span>
+            </div>
+          </div>
         </main>
 
-        {/* ── 3. Feature pills ── */}
-        <div className="lg-pills">
-          {PILLS.map((p) => (
-            <div className="lg-pill" key={p.text}>
-              <p.Icon size={15} strokeWidth={2} />
-              <span>{p.text}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* ── 4. Footer ── */}
+        {/* ── Footer ── */}
         <footer className="lg-footer">
           © {new Date().getFullYear()} {BRAND.university} • {BRAND.system} • {BRAND.version}
         </footer>
