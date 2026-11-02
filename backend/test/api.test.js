@@ -285,6 +285,8 @@ describe('absences and adjustments', () => {
     assert.equal((await amit.post('/absences', absenceBody({ reason: '  ' }))).status, 400);
     assert.equal((await amit.post('/absences', absenceBody({ date: '2026-02-31' }))).status, 400);
     assert.equal((await amit.post('/absences', absenceBody({ dayOfWeek: 'Sunday' }))).status, 400);
+    assert.equal((await amit.post('/absences', absenceBody({ dayOfWeek: 'Friday' }))).status, 400);
+    assert.equal((await amit.post('/absences', absenceBody({ date: '2020-01-06' }))).status, 400);
     assert.equal((await amit.post('/absences', absenceBody({ periodsToAdjust: [9] }))).status, 400);
     assert.equal((await amit.post('/absences', absenceBody({ periodsToAdjust: 'all' }))).status, 400);
 

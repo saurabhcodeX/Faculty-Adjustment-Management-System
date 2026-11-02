@@ -188,8 +188,13 @@ export function AppProvider({ children }) {
     }
   };
 
-  const login = async (email, password) => {
-    await api.login(email, password);
+  const login = async (email, password, expectedRole) => {
+    const { user: signedIn } = await api.login(email, password);
+    if (expectedRole && signedIn.role !== expectedRole) {
+      await api.logout().catch(() => {});
+      const actual = signedIn.role === 'hod' ? 'HOD / Admin' : 'Faculty';
+      throw new Error(`This is a ${actual} account. Select the ${actual} tab to sign in.`);
+    }
     setActiveTab('dashboard');
     await startSession();
   };

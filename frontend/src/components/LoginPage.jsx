@@ -113,7 +113,7 @@ export default function LoginPage() {
     setForgotOpen(false);
     setSubmitting(true);
     try {
-      await login(email, password);
+      await login(email, password, active.key);
       /* persist or clear remembered email */
       writeRemembered(remember ? email : '');
     } catch (err) {

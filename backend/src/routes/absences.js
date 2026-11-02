@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import express from 'express';
-import { ABSENCE_STATUSES } from '../constants.js';
+import { ABSENCE_STATUSES, DAYS_OF_WEEK } from '../constants.js';
 import { transaction } from '../db/index.js';
 import { badRequest, conflict, forbidden, notFound } from '../lib/errors.js';
 import { parsePagination, parseSort } from '../lib/pagination.js';
-import { optionalText, requireDate, requireDay, requireOneOf, requirePeriod, requireText } from '../lib/validate.js';
+import { optionalText, requireDate, requireOneOf, requirePeriod, requireText } from '../lib/validate.js';
 import { requireHod } from '../middleware/auth.js';
 import * as absences from '../repositories/absences.js';
 import * as adjustments from '../repositories/adjustments.js';
@@ -12,6 +12,15 @@ import * as faculty from '../repositories/faculty.js';
 import * as timetables from '../repositories/timetables.js';
 
 const SORT_COLUMNS = { date: 'date', reportedAt: 'reported_at', facultyName: 'faculty_name', status: 'status' };
+
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+// The weekday always comes from the date, so a request can never claim "Friday" for a Monday.
+const weekdayOf = date => WEEKDAYS[new Date(`${date}T00:00:00Z`).getUTCDay()];
+
+// One day of slack covers timezone differences between the user and the server.
+const isBeforeYesterday = date => date < new Date(Date.now() - ONE_DAY_MS).toISOString().slice(0, 10);
 
 // Leave reasons can be medical, so colleagues only see that someone is away, not why.
 export function presentAbsence(absence, user) {
@@ -106,6 +115,14 @@ export function absencesRouter({ db }) {
     if (!Array.isArray(body.periodsToAdjust)) throw badRequest('Lecture periods must be a list.');
 
     const date = requireDate(body.date);
+    const dayOfWeek = weekdayOf(date);
+    if (!DAYS_OF_WEEK.includes(dayOfWeek)) throw badRequest('Absences cannot be reported for a Sunday.');
+    if (body.dayOfWeek !== undefined && body.dayOfWeek !== dayOfWeek) {
+      throw badRequest('The day of the week does not match the date.');
+    }
+    if (req.user.role !== 'hod' && isBeforeYesterday(date)) {
+      throw badRequest('You cannot report an absence for a past date.');
+    }
     const periodsToAdjust = [...new Set(body.periodsToAdjust.map(p => requirePeriod(p).id))];
     const overlapping = absences
       .listActiveAbsencesFor(db, member.id, date)
@@ -120,7 +137,7 @@ export function absencesRouter({ db }) {
       facultyId: member.id,
       facultyName: member.name,
       date,
-      dayOfWeek: requireDay(body.dayOfWeek),
+      dayOfWeek,
       reason: requireText(body.reason, 'Reason'),
       leaveType: optionalText(body.leaveType, 'Leave type', 'Casual Leave'),
       status: 'Pending',
