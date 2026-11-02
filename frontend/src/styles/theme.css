@@ -1,0 +1,70 @@
+/* ================================================================
+   FAMS Design System — CSS Custom Properties & Tokens
+   ================================================================ */
+
+/* ── Global Font Import ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Brand Colors ── */
+  --fams-navy: #14213D;
+  --fams-navy-light: #1b2d52;
+  --fams-navy-dark: #0d1628;
+  --fams-blue: #2563EB;
+  --fams-blue-light: #3b82f6;
+  --fams-blue-dark: #1d4ed8;
+  --fams-teal: #0D9488;
+  --fams-teal-light: #14b8a6;
+
+  /* ── Neutrals ── */
+  --fams-white: #FFFFFF;
+  --fams-gray-50: #F8FAFC;
+  --fams-gray-100: #F1F5F9;
+  --fams-gray-200: #E2E8F0;
+  --fams-gray-300: #CBD5E1;
+  --fams-gray-400: #94A3B8;
+  --fams-gray-500: #64748B;
+  --fams-gray-600: #475569;
+  --fams-gray-700: #334155;
+  --fams-gray-800: #1E293B;
+  --fams-gray-900: #0F172A;
+
+  /* ── Semantic ── */
+  --fams-success: #059669;
+  --fams-success-bg: #ECFDF5;
+  --fams-success-border: #A7F3D0;
+  --fams-warning: #D97706;
+  --fams-warning-bg: #FFFBEB;
+  --fams-warning-border: #FDE68A;
+  --fams-danger: #DC2626;
+  --fams-danger-bg: #FEF2F2;
+  --fams-danger-border: #FECACA;
+  --fams-info: #2563EB;
+  --fams-info-bg: #EFF6FF;
+  --fams-info-border: #BFDBFE;
+
+  /* ── Typography ── */
+  --fams-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --fams-font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* ── Spacing ── */
+  --fams-sidebar-width: 260px;
+  --fams-sidebar-collapsed: 72px;
+  --fams-header-height: 64px;
+  --fams-radius-sm: 6px;
+  --fams-radius: 10px;
+  --fams-radius-lg: 14px;
+  --fams-radius-xl: 20px;
+
+  /* ── Shadows ── */
+  --fams-shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --fams-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+  --fams-shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --fams-shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+  --fams-shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+
+  /* ── Transitions ── */
+  --fams-transition: 0.2s ease;
+  --fams-transition-slow: 0.3s ease;
+}
+

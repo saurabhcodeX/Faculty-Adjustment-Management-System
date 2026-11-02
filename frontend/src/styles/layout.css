@@ -1,0 +1,415 @@
+/* ================================================================
+   FAMS Layout System — Sidebar, Header, Content Area
+   ================================================================ */
+
+/* ── App Shell ── */
+.fams-layout {
+  display: flex;
+  min-height: 100vh;
+  background: var(--fams-gray-50);
+  font-family: var(--fams-font);
+}
+
+/* ── Sidebar ── */
+.fams-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--fams-sidebar-width);
+  background: var(--fams-navy);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  transition: width var(--fams-transition-slow);
+  overflow: hidden;
+}
+
+.fams-sidebar--collapsed {
+  width: var(--fams-sidebar-collapsed);
+}
+
+/* Sidebar Brand */
+.fams-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 68px;
+  flex-shrink: 0;
+}
+
+.fams-sidebar__logo {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--fams-radius);
+  background: var(--fams-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+}
+
+.fams-sidebar__logo svg {
+  color: #fff;
+}
+
+.fams-sidebar__brand-text {
+  overflow: hidden;
+  white-space: nowrap;
+  transition: opacity var(--fams-transition);
+}
+
+.fams-sidebar--collapsed .fams-sidebar__brand-text {
+  opacity: 0;
+  width: 0;
+}
+
+.fams-sidebar__brand-title {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.fams-sidebar__brand-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+/* Sidebar Navigation */
+.fams-sidebar__nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 10px;
+}
+
+.fams-sidebar__section {
+  margin-bottom: 20px;
+}
+
+.fams-sidebar__section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 0 10px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity var(--fams-transition);
+}
+
+.fams-sidebar--collapsed .fams-sidebar__section-label {
+  opacity: 0;
+}
+
+.fams-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--fams-radius-sm);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--fams-transition);
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  position: relative;
+  white-space: nowrap;
+}
+
+.fams-sidebar__link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.fams-sidebar__link--active {
+  background: rgba(37, 99, 235, 0.2);
+  color: #fff;
+}
+
+.fams-sidebar__link--active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: var(--fams-blue-light);
+  border-radius: 0 3px 3px 0;
+}
+
+.fams-sidebar__link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+}
+
+.fams-sidebar__link-text {
+  overflow: hidden;
+  transition: opacity var(--fams-transition);
+}
+
+.fams-sidebar--collapsed .fams-sidebar__link-text {
+  opacity: 0;
+  width: 0;
+}
+
+.fams-sidebar__badge {
+  margin-left: auto;
+  background: var(--fams-danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.fams-sidebar--collapsed .fams-sidebar__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  font-size: 9px;
+  padding: 0 4px;
+}
+
+/* Sidebar Collapse Toggle */
+.fams-sidebar__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all var(--fams-transition);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  width: 100%;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.fams-sidebar__toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.fams-sidebar__toggle-text {
+  transition: opacity var(--fams-transition);
+}
+
+.fams-sidebar--collapsed .fams-sidebar__toggle-text {
+  opacity: 0;
+  width: 0;
+}
+
+/* Demo Mode Badge in sidebar */
+.fams-sidebar__demo-badge {
+  margin: 0 10px 10px;
+  padding: 8px 12px;
+  background: rgba(217, 119, 6, 0.15);
+  border: 1px solid rgba(217, 119, 6, 0.25);
+  border-radius: var(--fams-radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.fams-sidebar__demo-badge span {
+  font-size: 11px;
+  color: #fbbf24;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fams-sidebar--collapsed .fams-sidebar__demo-badge span {
+  display: none;
+}
+
+/* ── Top Header ── */
+.fams-header {
+  position: fixed;
+  top: 0;
+  left: var(--fams-sidebar-width);
+  right: 0;
+  height: var(--fams-header-height);
+  background: var(--fams-white);
+  border-bottom: 1px solid var(--fams-gray-200);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 900;
+  transition: left var(--fams-transition-slow);
+  box-shadow: var(--fams-shadow-sm);
+}
+
+.fams-header--collapsed {
+  left: var(--fams-sidebar-collapsed);
+}
+
+.fams-header__left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.fams-header__mobile-toggle {
+  display: none;
+  border: none;
+  background: none;
+  padding: 6px;
+  border-radius: var(--fams-radius-sm);
+  color: var(--fams-gray-600);
+  cursor: pointer;
+}
+
+.fams-header__mobile-toggle:hover {
+  background: var(--fams-gray-100);
+}
+
+.fams-header__page-info {
+  min-width: 0;
+}
+
+.fams-header__breadcrumb {
+  font-size: 11px;
+  color: var(--fams-gray-400);
+  font-weight: 500;
+}
+
+.fams-header__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--fams-gray-900);
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fams-header__right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* ── Main Content Area ── */
+.fams-main {
+  margin-left: var(--fams-sidebar-width);
+  margin-top: var(--fams-header-height);
+  flex: 1;
+  padding: 24px;
+  min-height: calc(100vh - var(--fams-header-height));
+  transition: margin-left var(--fams-transition-slow);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.fams-main--collapsed {
+  margin-left: var(--fams-sidebar-collapsed);
+}
+
+/* ── Footer ── */
+.fams-footer {
+  margin-left: var(--fams-sidebar-width);
+  padding: 16px 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--fams-gray-400);
+  border-top: 1px solid var(--fams-gray-200);
+  background: var(--fams-white);
+  transition: margin-left var(--fams-transition-slow);
+}
+
+.fams-footer--collapsed {
+  margin-left: var(--fams-sidebar-collapsed);
+}
+
+/* ── Mobile Overlay ── */
+.fams-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  backdrop-filter: blur(2px);
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .fams-sidebar {
+    transform: translateX(-100%);
+    width: var(--fams-sidebar-width) !important;
+  }
+
+  .fams-sidebar--mobile-open {
+    transform: translateX(0);
+  }
+
+  .fams-sidebar--mobile-open ~ .fams-overlay,
+  .fams-overlay--visible {
+    display: block;
+  }
+
+  .fams-header {
+    left: 0 !important;
+  }
+
+  .fams-header__mobile-toggle {
+    display: flex;
+  }
+
+  .fams-main,
+  .fams-footer {
+    margin-left: 0 !important;
+  }
+
+  .fams-main {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .fams-header {
+    padding: 0 12px;
+  }
+
+  .fams-header__title {
+    font-size: 15px;
+  }
+
+  .fams-main {
+    padding: 12px;
+  }
+}
+

@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import Navbar from './components/Navbar';
-import NavigationTabs from './components/NavigationTabs';
+import AppLayout from './components/layout/AppLayout';
 import Dashboard from './components/Dashboard';
 import FacultyAbsenceReport from './components/FacultyAbsenceReport';
 import HodAdjustmentManager from './components/HodAdjustmentManager';
 import MasterTimetableView from './components/MasterTimetableView';
 import MyAdjustmentsView from './components/MyAdjustmentsView';
 import TimetableEditor from './components/TimetableEditor';
+import FacultyDirectory from './components/faculty/FacultyDirectory';
+import ReportsPage from './components/reports/ReportsPage';
 import PrintSlipModal from './components/PrintSlipModal';
 import NotificationToast from './components/NotificationToast';
 import ConfirmModal from './components/ConfirmModal';
@@ -54,18 +55,10 @@ function AppGate() {
 function MainApp() {
   const { activeTab, confirmState, handleConfirm, handleCancelConfirm } = useApp();
   const [showPrintModal, setShowPrintModal] = useState(false);
-  const [tabsOpen, setTabsOpen] = useState(false);
 
   return (
-    <div className="app-layout">
-      {/* Top Header Navbar */}
-      <Navbar tabsOpen={tabsOpen} onToggleTabs={() => setTabsOpen(open => !open)} />
-
-      {/* Navigation Tab Bar */}
-      <NavigationTabs open={tabsOpen} onNavigate={() => setTabsOpen(false)} />
-
-      {/* Main Tab Content */}
-      <main className="main-content-container">
+    <>
+      <AppLayout>
         {activeTab === 'dashboard' && (
           <Dashboard onOpenPrintModal={() => setShowPrintModal(true)} />
         )}
@@ -84,7 +77,13 @@ function MainApp() {
         {activeTab === 'timetable-editor' && (
           <TimetableEditor />
         )}
-      </main>
+        {activeTab === 'faculty-directory' && (
+          <FacultyDirectory />
+        )}
+        {activeTab === 'reports' && (
+          <ReportsPage />
+        )}
+      </AppLayout>
 
       {/* Printable Notice Slip Modal */}
       {showPrintModal && (
@@ -102,16 +101,7 @@ function MainApp() {
         onConfirm={handleConfirm}
         onCancel={handleCancelConfirm}
       />
-
-      {/* Minimal App Footer */}
-      <footer className="app-footer">
-        <div className="footer-content">
-          <span>Faculty Adjustment Management System • 8-Period Timetable Automation</span>
-          <span className="footer-dot">•</span>
-          <span>Automatic Conflict-Free Free Teacher Assignment</span>
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }
 
