@@ -1,0 +1,250 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ============================================================
+   DESIGN TOKENS — ROOT VARIABLES
+   ============================================================ */
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Primary — Professional Navy Blue */
+  --primary:        #1E4D7B;
+  --primary-hover:  #163A5F;
+  --primary-light:  #EBF1F6;
+  --primary-border: #C5D9E8;
+
+  /* Success — Emerald */
+  --success:        #059669;
+  --success-light:  #ecfdf5;
+  --success-text:   #065f46;
+  --success-border: #6ee7b7;
+
+  /* Danger — Rose */
+  --danger:         #dc2626;
+  --danger-light:   #fef2f2;
+  --danger-text:    #991b1b;
+  --danger-border:  #fecaca;
+
+  /* Warning — Amber */
+  --warning:        #d97706;
+  --warning-light:  #fffbeb;
+  --warning-text:   #92400e;
+  --warning-border: #fde68a;
+
+  /* Info */
+  --info:           #0284c7;
+  --info-light:     #e0f2fe;
+  --info-text:      #075985;
+
+  /* Backgrounds */
+  --bg-app:         #F4F6F9;
+  --bg-card:        #ffffff;
+  --bg-nav:         #ffffff;
+  --bg-hover:       #f8fafc;
+  --bg-muted:       #e2e8f0;
+
+  /* Borders */
+  --border-light:   #E5E7EB;
+  --border-subtle:  #f1f5f9;
+
+  /* Text */
+  --text-main:      #1F2937;
+  --text-muted:     #6B7280;
+  --text-subtle:    #94a3b8;
+
+  /* Radius */
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  24px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg:  0 10px 30px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.04);
+  --shadow-xl:  0 20px 60px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.06);
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 16px;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+img, svg {
+  display: block;
+}
+
+/* ============================================================
+   UTILITY — FLEX / LAYOUT
+   ============================================================ */
+.flex            { display: flex; }
+.flex-col        { flex-direction: column; }
+.flex-1          { flex: 1; }
+.items-center    { align-items: center; }
+.items-start     { align-items: flex-start; }
+.items-end       { align-items: flex-end; }
+.justify-between { justify-content: space-between; }
+.justify-center  { justify-content: center; }
+.justify-end     { justify-content: flex-end; }
+.justify-start   { justify-content: flex-start; }
+.gap-1    { gap: 0.25rem; }
+.gap-1\.5 { gap: 0.375rem; }
+.gap-2    { gap: 0.5rem; }
+.gap-3    { gap: 0.75rem; }
+.gap-4    { gap: 1rem; }
+.gap-5    { gap: 1.25rem; }
+.gap-6    { gap: 1.5rem; }
+.gap-8    { gap: 2rem; }
+.w-full   { width: 100%; }
+.h-full   { height: 100%; }
+.shrink-0 { flex-shrink: 0; }
+.grow     { flex-grow: 1; }
+.overflow-hidden   { overflow: hidden; }
+.overflow-x-auto   { overflow-x: auto; }
+.overflow-y-auto   { overflow-y: auto; }
+.mx-auto  { margin-left: auto; margin-right: auto; }
+.ml-auto  { margin-left: auto; }
+.mr-auto  { margin-right: auto; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.fixed    { position: fixed; }
+.sticky   { position: sticky; }
+.inset-0  { inset: 0; }
+.z-10     { z-index: 10; }
+.z-20     { z-index: 20; }
+.z-40     { z-index: 40; }
+.z-50     { z-index: 50; }
+
+/* Spacing utilities */
+.space-y-2 > * + * { margin-top: 0.5rem; }
+.space-y-3 > * + * { margin-top: 0.75rem; }
+.space-y-4 > * + * { margin-top: 1rem; }
+.space-y-6 > * + * { margin-top: 1.5rem; }
+.space-y-8 > * + * { margin-top: 2rem; }
+
+.p-0  { padding: 0; }
+.p-2  { padding: 0.5rem; }
+.p-3  { padding: 0.75rem; }
+.p-4  { padding: 1rem; }
+.p-5  { padding: 1.25rem; }
+.p-6  { padding: 1.5rem; }
+.p-8  { padding: 2rem; }
+.p-10 { padding: 2.5rem; }
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+.py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+.mt-1 { margin-top: 0.25rem; }
+.mt-2 { margin-top: 0.5rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.mt-6 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: 0.25rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-6 { margin-bottom: 1.5rem; }
+
+/* ============================================================
+   UTILITY — TYPOGRAPHY
+   ============================================================ */
+.font-normal   { font-weight: 400; }
+.font-medium   { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold     { font-weight: 700; }
+.font-extrabold{ font-weight: 800; }
+.text-xs   { font-size: 0.75rem;  line-height: 1rem; }
+.text-sm   { font-size: 0.875rem; line-height: 1.25rem; }
+.text-base { font-size: 1rem;     line-height: 1.5rem; }
+.text-lg   { font-size: 1.125rem; line-height: 1.75rem; }
+.text-xl   { font-size: 1.25rem;  line-height: 1.75rem; }
+.text-2xl  { font-size: 1.5rem;   line-height: 2rem; }
+.text-3xl  { font-size: 1.875rem; line-height: 2.25rem; }
+.uppercase     { text-transform: uppercase; }
+.lowercase     { text-transform: lowercase; }
+.capitalize    { text-transform: capitalize; }
+.tracking-wide { letter-spacing: 0.025em; }
+.tracking-wider{ letter-spacing: 0.05em; }
+.text-center   { text-align: center; }
+.text-left     { text-align: left; }
+.text-right    { text-align: right; }
+.leading-tight { line-height: 1.25; }
+.leading-snug  { line-height: 1.375; }
+.line-through  { text-decoration: line-through; }
+.underline     { text-decoration: underline; }
+.italic        { font-style: italic; }
+.block         { display: block; }
+.inline        { display: inline; }
+.inline-flex   { display: inline-flex; }
+.whitespace-nowrap { white-space: nowrap; }
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.font-mono { font-family: var(--font-mono); }
+
+/* Color utilities */
+.text-slate-400  { color: #94a3b8; }
+.text-slate-500  { color: #64748b; }
+.text-slate-600  { color: #475569; }
+.text-slate-700  { color: #334155; }
+.text-slate-800  { color: #1e293b; }
+.text-slate-900  { color: #0f172a; }
+.text-indigo-600 { color: #4f46e5; }
+.text-indigo-700 { color: #4338ca; }
+.text-emerald-500{ color: #10b981; }
+.text-emerald-600{ color: #059669; }
+.text-emerald-700{ color: #047857; }
+.text-rose-500   { color: #f43f5e; }
+.text-rose-600   { color: #e11d48; }
+.text-rose-700   { color: #be123c; }
+.text-amber-500  { color: #f59e0b; }
+.text-amber-600  { color: #d97706; }
+.text-amber-700  { color: #b45309; }
+.text-blue-600   { color: #2563eb; }
+.text-white      { color: #ffffff; }
+
+.bg-white     { background-color: #ffffff; }
+.bg-slate-50  { background-color: #f8fafc; }
+.bg-slate-100 { background-color: #f1f5f9; }
+
+.border        { border: 1px solid var(--border-light); }
+.border-b      { border-bottom: 1px solid var(--border-light); }
+.border-t      { border-top: 1px solid var(--border-light); }
+.border-amber-200 { border-color: #fde68a; }
+.rounded       { border-radius: var(--radius-sm); }
+.rounded-md    { border-radius: var(--radius-md); }
+.rounded-lg    { border-radius: var(--radius-lg); }
+.rounded-full  { border-radius: 9999px; }
