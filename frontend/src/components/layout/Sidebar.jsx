@@ -5,6 +5,9 @@ import {
   CalendarX2,
   Workflow,
   CalendarDays,
+  ClipboardCheck,
+  Bell,
+  UserRound,
   UserCheck2,
   Sliders,
   Users,
@@ -51,10 +54,18 @@ const FACULTY_NAV = [
     ]
   },
   {
-    label: 'View',
+    label: 'My Work',
     items: [
-      { id: 'master-timetable', label: 'Master Timetable', icon: CalendarDays },
-      { id: 'my-schedule', label: 'My Schedule', icon: UserCheck2 },
+      { id: 'my-schedule', label: 'My Schedule', icon: CalendarDays },
+      { id: 'my-absence-requests', label: 'My Absence Requests', icon: ClipboardCheck },
+      { id: 'my-substitute-assignments', label: 'Substitute Assignments', icon: UserCheck2 },
+    ]
+  },
+  {
+    label: 'Other',
+    items: [
+      { id: 'faculty-notifications', label: 'Notifications', icon: Bell },
+      { id: 'faculty-profile', label: 'My Profile', icon: UserRound },
     ]
   }
 ];

@@ -16,6 +16,7 @@ export default function MyAdjustmentsView() {
     currentFacultyId,
     setCurrentFacultyId,
     currentRole,
+    user,
     timetables,
     PERIODS,
     selectedDay,
@@ -24,7 +25,10 @@ export default function MyAdjustmentsView() {
     absences
   } = useApp();
 
-  const currentFaculty = facultyList.find(f => f.id === currentFacultyId) || facultyList[0];
+  const currentFaculty = currentRole === 'hod'
+    ? facultyList.find(f => f.id === currentFacultyId) || facultyList[0]
+    : facultyList.find(f => f.id === user.id) || user;
+  if (!currentFaculty) return null;
   const schedule = timetables[currentFaculty.id]?.[selectedDay] || {};
 
   // Check if this teacher is absent today
@@ -38,8 +42,8 @@ export default function MyAdjustmentsView() {
   // Find all adjustments assigned TO this teacher for today (Proxy duties)
   const myProxyDuties = adjustments.filter(
     adj =>
-      adj.substituteFacultyId === currentFaculty.id &&
-      (adj.date === selectedDate || adj.dayOfWeek === selectedDay)
+      adj.substituteFacultyId === (currentRole === 'hod' ? currentFaculty.id : user.id) &&
+      (currentRole === 'hod' ? (adj.date === selectedDate || adj.dayOfWeek === selectedDay) : true)
   );
 
   return (

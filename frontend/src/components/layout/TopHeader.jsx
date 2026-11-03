@@ -25,6 +25,10 @@ const PAGE_TITLES = {
   'hod-requests': 'Adjustment Console',
   'master-timetable': 'Master Timetable',
   'my-schedule': 'My Schedule & Proxy Duties',
+  'my-substitute-assignments': 'Substitute Assignments',
+  'my-absence-requests': 'My Absence Requests',
+  'faculty-notifications': 'Notifications',
+  'faculty-profile': 'My Profile',
   'timetable-editor': 'Timetable Manager',
   'faculty-directory': 'Faculty Directory',
   'reports': 'Reports & Analytics'
@@ -197,7 +201,7 @@ export default function TopHeader({ collapsed, onMobileOpen }) {
         </div>
 
         {/* Center: Search */}
-        <HeaderSearch />
+        {currentRole === 'hod' && <HeaderSearch />}
 
         {/* Right: Notifications + User */}
         <div className="fams-header__right" ref={panelsRef}>

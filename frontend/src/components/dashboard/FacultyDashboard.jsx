@@ -1,330 +1,98 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
 import {
-  CalendarX,
-  Clock,
-  BookOpen,
-  ClipboardList,
-  CheckCircle2,
-  AlertCircle,
-  XCircle,
-  ArrowRight,
-  Briefcase,
-  GraduationCap,
-  MapPin
+  CalendarDays, CalendarX2, ClipboardList, CheckCircle2, Clock3,
+  XCircle, ArrowRight, BookOpen, MapPin, Users, FileClock
 } from 'lucide-react';
 
+const dateLabel = value => {
+  if (!value) return '—';
+  const date = new Date(`${value}T00:00:00`);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
 export default function FacultyDashboard() {
-  const {
-    user,
-    absences,
-    adjustments,
-    timetables,
-    selectedDate,
-    selectedDay,
-    setActiveTab,
-    PERIODS
-  } = useApp();
+  const { user, absences, adjustments, timetables, selectedDate, selectedDay, setActiveTab, PERIODS } = useApp();
+  const ownAbsences = absences.filter(item => item.facultyId === user.id)
+    .sort((a, b) => new Date(b.reportedAt || b.date) - new Date(a.reportedAt || a.date));
+  const ownAssignments = adjustments.filter(item => item.substituteFacultyId === user.id)
+    .sort((a, b) => `${a.date}-${a.periodId}`.localeCompare(`${b.date}-${b.periodId}`));
+  const ownSchedule = timetables[user.id]?.[selectedDay] || {};
+  const counts = {
+    total: ownAbsences.length,
+    pending: ownAbsences.filter(item => item.status === 'Pending').length,
+    approved: ownAbsences.filter(item => item.status === 'Approved').length,
+    rejected: ownAbsences.filter(item => item.status === 'Rejected').length
+  };
+  const stats = [
+    ['Total Absence Requests', counts.total, 'All requests you have submitted', FileClock, 'blue'],
+    ['Pending Requests', counts.pending, 'Awaiting HOD review', Clock3, 'amber'],
+    ['Approved Requests', counts.approved, 'Approved absences', CheckCircle2, 'green'],
+    ['Rejected Requests', counts.rejected, 'Requests not approved', XCircle, 'red']
+  ];
+  const actions = [
+    ['Report New Absence', 'Submit an absence request', CalendarX2, 'report-absence', 'amber'],
+    ['View My Schedule', 'Classes and substitute duties', CalendarDays, 'my-schedule', 'teal'],
+    ['View Absence History', 'Review your submitted requests', FileClock, 'my-absence-requests', 'indigo'],
+    ['Substitute Assignments', 'Classes assigned to you', Users, 'my-substitute-assignments', 'blue']
+  ];
+  const badge = status => status === 'Approved' ? 'green' : status === 'Rejected' ? 'red' : 'amber';
 
-  // My data
-  const myAbsences = absences.filter(a => a.facultyId === user.id);
-  const myPending = myAbsences.filter(a => a.status === 'Pending');
-  const myApproved = myAbsences.filter(a => a.status === 'Approved');
-  const myRejected = myAbsences.filter(a => a.status === 'Rejected');
-
-  // My proxy duties (where I'm the substitute)
-  const myProxyDuties = adjustments.filter(adj => adj.substituteFacultyId === user.id);
-  const todaysProxyDuties = myProxyDuties.filter(adj => adj.date === selectedDate);
-
-  // My today's timetable
-  const myTimetable = timetables[user.id] || {};
-  const todaySlots = myTimetable[selectedDay] || {};
-
-  const today = new Date();
-  const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-
-  // Get greeting based on time
-  const hour = today.getHours();
-  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
-
-  return (
-    <div>
-      {/* Welcome Banner */}
-      <div className="fams-welcome">
-        <div className="fams-welcome__greeting">{greeting}</div>
-        <div className="fams-welcome__name">{user.name}</div>
-        <div className="fams-welcome__info">
-          {user.designation && <span><GraduationCap size={13} /> {user.designation}</span>}
-          {user.department && <span><Briefcase size={13} /> {user.department}</span>}
-          <span><Clock size={13} /> {dateStr}</span>
+  return <div className="faculty-dashboard">
+    <section className="faculty-welcome">
+      <div>
+        <div className="faculty-welcome__eyebrow">Faculty workspace</div>
+        <h1>Welcome back, {user.name}</h1>
+        <p>Here’s your schedule, absence requests, and substitute assignments.</p>
+        <div className="faculty-welcome__meta">
+          {user.designation && <span>{user.designation}</span>}
+          {user.department && <span>{user.department}</span>}
+          <span><CalendarDays size={14} /> {new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</span>
         </div>
       </div>
+      <div className="faculty-welcome__mark"><BookOpen size={32} /></div>
+    </section>
 
-      {/* KPI Stats */}
-      <div className="fams-stats-grid">
-        <div className="fams-stat-card">
-          <div className="fams-stat-card__info">
-            <div className="fams-stat-card__label">Pending Requests</div>
-            <div className="fams-stat-card__value">{myPending.length}</div>
-            <div className="fams-stat-card__sub">Awaiting HOD review</div>
-          </div>
-          <div className="fams-stat-card__icon fams-stat-card__icon--amber">
-            <AlertCircle size={22} />
-          </div>
-        </div>
+    <section className="fams-stats-grid" aria-label="Absence request statistics">
+      {stats.map(([label, value, sub, Icon, color]) => <article className="fams-stat-card" key={label}>
+        <div className="fams-stat-card__info"><div className="fams-stat-card__label">{label}</div><div className="fams-stat-card__value">{value}</div><div className="fams-stat-card__sub">{sub}</div></div>
+        <div className={`fams-stat-card__icon fams-stat-card__icon--${color}`}><Icon size={21} /></div>
+      </article>)}
+    </section>
 
-        <div className="fams-stat-card">
-          <div className="fams-stat-card__info">
-            <div className="fams-stat-card__label">Approved Leaves</div>
-            <div className="fams-stat-card__value">{myApproved.length}</div>
-            <div className="fams-stat-card__sub">Total approved</div>
-          </div>
-          <div className="fams-stat-card__icon fams-stat-card__icon--green">
-            <CheckCircle2 size={22} />
-          </div>
-        </div>
+    <div className="fams-section-header faculty-section-heading"><div><h2 className="fams-section-title">Quick actions</h2><p>Jump to a common task</p></div></div>
+    <section className="fams-quick-actions">
+      {actions.map(([title, desc, Icon, tab, color]) => <button className="fams-quick-action" key={title} onClick={() => setActiveTab(tab)}>
+        <span className={`fams-quick-action__icon fams-quick-action__icon--${color}`}><Icon size={20} /></span>
+        <span className="fams-quick-action__text"><span className="fams-quick-action__title">{title}</span><span className="fams-quick-action__desc">{desc}</span></span><ArrowRight size={16} className="faculty-action-arrow" />
+      </button>)}
+    </section>
 
-        <div className="fams-stat-card">
-          <div className="fams-stat-card__info">
-            <div className="fams-stat-card__label">Proxy Duties</div>
-            <div className="fams-stat-card__value">{myProxyDuties.length}</div>
-            <div className="fams-stat-card__sub">{todaysProxyDuties.length} today</div>
-          </div>
-          <div className="fams-stat-card__icon fams-stat-card__icon--teal">
-            <ClipboardList size={22} />
-          </div>
-        </div>
-
-        <div className="fams-stat-card">
-          <div className="fams-stat-card__info">
-            <div className="fams-stat-card__label">Rejected</div>
-            <div className="fams-stat-card__value">{myRejected.length}</div>
-            <div className="fams-stat-card__sub">Total declined</div>
-          </div>
-          <div className="fams-stat-card__icon fams-stat-card__icon--red">
-            <XCircle size={22} />
-          </div>
-        </div>
+    <section className="fams-card faculty-section-card">
+      <div className="fams-card__header"><div><div className="fams-card__title"><FileClock size={17} /> My recent absence requests</div><div className="fams-card__subtitle">Your latest submissions and their approval status</div></div><button className="fams-btn fams-btn--ghost fams-btn--sm" onClick={() => setActiveTab('my-absence-requests')}>View history <ArrowRight size={14} /></button></div>
+      <div className="fams-card__body fams-card__body--flush">
+        {!ownAbsences.length ? <div className="fams-empty"><div className="fams-empty__icon"><CheckCircle2 size={24} /></div><div className="fams-empty__title">No absence requests yet</div><div className="fams-empty__desc">Requests you submit will appear here.</div></div> :
+          <div className="fams-table-wrap"><table className="fams-table"><thead><tr><th>Request Date</th><th>Absence Date</th><th>Reason</th><th>Leave Type</th><th>Approval Status</th><th>Action</th></tr></thead><tbody>
+            {ownAbsences.slice(0, 6).map(item => <tr key={item.id}><td>{dateLabel(item.reportedAt?.slice(0, 10))}</td><td>{dateLabel(item.date)}</td><td>{item.reason || '—'}</td><td>{item.leaveType || '—'}</td><td><span className={`fams-badge fams-badge--${badge(item.status)}`}>{item.status}</span></td><td><button className="fams-btn fams-btn--ghost fams-btn--sm" onClick={() => setActiveTab('my-absence-requests')}>Details <ArrowRight size={13} /></button></td></tr>)}
+          </tbody></table></div>}
       </div>
+    </section>
 
-      {/* Quick Actions */}
-      <div className="fams-quick-actions">
-        <button className="fams-quick-action" onClick={() => setActiveTab('report-absence')}>
-          <div className="fams-quick-action__icon fams-quick-action__icon--amber">
-            <CalendarX size={20} />
-          </div>
-          <div className="fams-quick-action__text">
-            <div className="fams-quick-action__title">Report Absence</div>
-            <div className="fams-quick-action__desc">Submit leave request</div>
-          </div>
-        </button>
-
-        <button className="fams-quick-action" onClick={() => setActiveTab('my-schedule')}>
-          <div className="fams-quick-action__icon fams-quick-action__icon--teal">
-            <ClipboardList size={20} />
-          </div>
-          <div className="fams-quick-action__text">
-            <div className="fams-quick-action__title">My Schedule</div>
-            <div className="fams-quick-action__desc">View proxy duties</div>
-          </div>
-        </button>
-
-        <button className="fams-quick-action" onClick={() => setActiveTab('master-timetable')}>
-          <div className="fams-quick-action__icon fams-quick-action__icon--indigo">
-            <BookOpen size={20} />
-          </div>
-          <div className="fams-quick-action__text">
-            <div className="fams-quick-action__title">Master Timetable</div>
-            <div className="fams-quick-action__desc">Full 8-period view</div>
-          </div>
-        </button>
+    <section className="fams-card faculty-section-card">
+      <div className="fams-card__header"><div><div className="fams-card__title"><ClipboardList size={17} /> My substitute assignments</div><div className="fams-card__subtitle">Classes assigned to you by the HOD</div></div><button className="fams-btn fams-btn--ghost fams-btn--sm" onClick={() => setActiveTab('my-substitute-assignments')}>View assignments <ArrowRight size={14} /></button></div>
+      <div className="fams-card__body fams-card__body--flush">
+        {!ownAssignments.length ? <div className="fams-empty"><div className="fams-empty__icon"><ClipboardList size={24} /></div><div className="fams-empty__title">No substitute assignments</div><div className="fams-empty__desc">New assignments relevant to you will appear here.</div></div> :
+          <div className="fams-table-wrap"><table className="fams-table"><thead><tr><th>Date</th><th>Period</th><th>Original Faculty</th><th>Subject</th><th>Class</th><th>Room</th></tr></thead><tbody>
+            {ownAssignments.slice(0, 8).map(item => <tr key={item.id}><td>{dateLabel(item.date)}</td><td>{item.periodId}{PERIODS.find(period => period.id === item.periodId)?.time ? ` · ${PERIODS.find(period => period.id === item.periodId).time}` : ''}</td><td>{item.originalFacultyName}</td><td>{item.subject}</td><td>{item.classGroup}</td><td><span className="faculty-room"><MapPin size={13} />{item.room || 'TBD'}</span></td></tr>)}
+          </tbody></table></div>}
       </div>
+    </section>
 
-      {/* Main Grid */}
-      <div className="fams-grid fams-grid--2-1">
-        {/* Today's Timetable */}
-        <div className="fams-card">
-          <div className="fams-card__header">
-            <div>
-              <div className="fams-card__title">
-                <BookOpen size={16} /> Today's Schedule
-              </div>
-              <div className="fams-card__subtitle">{selectedDay} ({selectedDate})</div>
-            </div>
-          </div>
-          <div className="fams-card__body fams-card__body--flush">
-            {PERIODS.length === 0 ? (
-              <div className="fams-empty">
-                <div className="fams-empty__title">No schedule data</div>
-              </div>
-            ) : (
-              <div className="fams-table-wrap">
-                <table className="fams-table">
-                  <thead>
-                    <tr>
-                      <th>Period</th>
-                      <th>Time</th>
-                      <th>Subject</th>
-                      <th>Class</th>
-                      <th>Room</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {PERIODS.map(period => {
-                      const slot = todaySlots[period.id];
-                      const proxyDuty = todaysProxyDuties.find(d => d.periodId === period.id);
-                      const hasClass = slot && slot.subject;
-
-                      return (
-                        <tr key={period.id}>
-                          <td>
-                            <span style={{ fontWeight: 600, color: 'var(--fams-gray-800)' }}>
-                              L{period.id}
-                            </span>
-                          </td>
-                          <td style={{ fontSize: 12, color: 'var(--fams-gray-500)' }}>
-                            {period.time}
-                          </td>
-                          <td>
-                            {proxyDuty ? (
-                              <span className="fams-badge fams-badge--teal">
-                                ⚡ Proxy: {proxyDuty.subject}
-                              </span>
-                            ) : hasClass ? (
-                              <span style={{ fontWeight: 500 }}>{slot.subject}</span>
-                            ) : (
-                              <span style={{ color: 'var(--fams-gray-400)', fontSize: 12 }}>Free</span>
-                            )}
-                          </td>
-                          <td>
-                            {proxyDuty ? (
-                              <span style={{ fontSize: 12 }}>{proxyDuty.classGroup}</span>
-                            ) : hasClass ? (
-                              <span style={{ fontSize: 12 }}>{slot.classGroup}</span>
-                            ) : (
-                              <span style={{ color: 'var(--fams-gray-300)' }}>—</span>
-                            )}
-                          </td>
-                          <td>
-                            {(proxyDuty || hasClass) && (
-                              <span style={{ fontSize: 12, display: 'flex', alignItems: 'center', gap: 3 }}>
-                                <MapPin size={11} style={{ color: 'var(--fams-gray-400)' }} />
-                                {proxyDuty ? proxyDuty.room || 'TBD' : slot?.room || 'TBD'}
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* My Requests */}
-        <div className="fams-card">
-          <div className="fams-card__header">
-            <div className="fams-card__title">
-              <CalendarX size={16} /> My Requests
-            </div>
-            <button className="fams-btn fams-btn--ghost fams-btn--sm" onClick={() => setActiveTab('my-schedule')}>
-              View All <ArrowRight size={13} />
-            </button>
-          </div>
-          <div className="fams-card__body" style={{ padding: '8px 20px' }}>
-            {myAbsences.length === 0 ? (
-              <div className="fams-empty" style={{ padding: '32px 16px' }}>
-                <div className="fams-empty__icon">
-                  <CheckCircle2 size={22} />
-                </div>
-                <div className="fams-empty__title">No leave requests</div>
-                <div className="fams-empty__desc">
-                  Submit an absence request when needed.
-                </div>
-              </div>
-            ) : (
-              <div className="fams-activity-list">
-                {myAbsences.slice(0, 6).map(a => (
-                  <div key={a.id} className="fams-activity-item">
-                    <div className={`fams-activity-item__dot fams-activity-item__dot--${a.status.toLowerCase()}`} />
-                    <div className="fams-activity-item__content">
-                      <div className="fams-activity-item__title">
-                        {a.leaveType || a.reason}
-                      </div>
-                      <div className="fams-activity-item__meta">
-                        {a.dayOfWeek}, {a.date}
-                      </div>
-                    </div>
-                    <span className={`fams-badge fams-badge--${
-                      a.status === 'Pending' ? 'amber' : a.status === 'Approved' ? 'green' : 'red'
-                    }`}>
-                      {a.status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Proxy Duties Section */}
-      {todaysProxyDuties.length > 0 && (
-        <div className="fams-card" style={{ marginTop: 20 }}>
-          <div className="fams-card__header">
-            <div className="fams-card__title">
-              <ClipboardList size={16} /> Today's Proxy Duties
-            </div>
-            <span className="fams-badge fams-badge--teal">{todaysProxyDuties.length} assignment{todaysProxyDuties.length > 1 ? 's' : ''}</span>
-          </div>
-          <div className="fams-card__body fams-card__body--flush">
-            <div className="fams-table-wrap">
-              <table className="fams-table">
-                <thead>
-                  <tr>
-                    <th>Period</th>
-                    <th>Subject</th>
-                    <th>Class</th>
-                    <th>For (Absent)</th>
-                    <th>Room</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {todaysProxyDuties.map(adj => {
-                    const periodInfo = PERIODS.find(p => p.id === adj.periodId);
-                    return (
-                      <tr key={adj.id}>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>L{adj.periodId}</div>
-                          <div style={{ fontSize: 11, color: 'var(--fams-gray-400)' }}>
-                            {periodInfo ? periodInfo.time : adj.periodTime}
-                          </div>
-                        </td>
-                        <td style={{ fontWeight: 500 }}>{adj.subject}</td>
-                        <td>{adj.classGroup}</td>
-                        <td>
-                          <span style={{ color: 'var(--fams-danger)', fontSize: 13 }}>
-                            {adj.originalFacultyName}
-                          </span>
-                        </td>
-                        <td>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                            <MapPin size={11} style={{ color: 'var(--fams-gray-400)' }} />
-                            {adj.room || 'TBD'}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    <section className="fams-card faculty-section-card">
+      <div className="fams-card__header"><div><div className="fams-card__title"><BookOpen size={17} /> My timetable</div><div className="fams-card__subtitle">{selectedDay} · {dateLabel(selectedDate)}</div></div><button className="fams-btn fams-btn--ghost fams-btn--sm" onClick={() => setActiveTab('my-schedule')}>Full schedule <ArrowRight size={14} /></button></div>
+      <div className="fams-card__body fams-card__body--flush"><div className="fams-table-wrap"><table className="fams-table"><thead><tr><th>Day</th><th>Period</th><th>Time</th><th>Subject</th><th>Class</th><th>Room</th></tr></thead><tbody>
+        {PERIODS.map(period => { const slot = ownSchedule[period.id]; return <tr key={period.id}><td>{selectedDay}</td><td>{period.label || `Period ${period.id}`}</td><td>{period.time}</td><td>{slot?.subject || <span className="faculty-free">Free</span>}</td><td>{slot?.classGroup || '—'}</td><td>{slot?.room ? <span className="faculty-room"><MapPin size={13} />{slot.room}</span> : '—'}</td></tr>; })}
+      </tbody></table></div></div>
+    </section>
+  </div>;
 }
-

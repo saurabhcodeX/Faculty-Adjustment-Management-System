@@ -13,6 +13,7 @@ import PrintSlipModal from './components/PrintSlipModal';
 import NotificationToast from './components/NotificationToast';
 import ConfirmModal from './components/ConfirmModal';
 import LoginPage from './components/LoginPage';
+import { FacultyAbsenceRequests, FacultyNotifications, FacultyProfile } from './components/faculty/FacultyPages';
 import { AlertCircle, Loader2, RotateCw } from 'lucide-react';
 import './App.css';
 
@@ -53,36 +54,41 @@ function AppGate() {
 }
 
 function MainApp() {
-  const { activeTab, confirmState, handleConfirm, handleCancelConfirm } = useApp();
+  const { activeTab, currentRole, confirmState, handleConfirm, handleCancelConfirm } = useApp();
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const facultyTabs = ['dashboard', 'report-absence', 'my-schedule', 'my-substitute-assignments', 'my-absence-requests', 'faculty-notifications', 'faculty-profile'];
+  const visibleTab = currentRole === 'faculty' && !facultyTabs.includes(activeTab) ? 'dashboard' : activeTab;
 
   return (
     <>
       <AppLayout>
-        {activeTab === 'dashboard' && (
+        {visibleTab === 'dashboard' && (
           <Dashboard onOpenPrintModal={() => setShowPrintModal(true)} />
         )}
-        {activeTab === 'report-absence' && (
+        {visibleTab === 'report-absence' && (
           <FacultyAbsenceReport />
         )}
-        {activeTab === 'hod-requests' && (
+        {currentRole === 'hod' && visibleTab === 'hod-requests' && (
           <HodAdjustmentManager onOpenPrintModal={() => setShowPrintModal(true)} />
         )}
-        {activeTab === 'master-timetable' && (
+        {currentRole === 'hod' && visibleTab === 'master-timetable' && (
           <MasterTimetableView onOpenPrintModal={() => setShowPrintModal(true)} />
         )}
-        {activeTab === 'my-schedule' && (
+        {(visibleTab === 'my-schedule' || visibleTab === 'my-substitute-assignments') && (
           <MyAdjustmentsView />
         )}
-        {activeTab === 'timetable-editor' && (
+        {currentRole === 'hod' && visibleTab === 'timetable-editor' && (
           <TimetableEditor />
         )}
-        {activeTab === 'faculty-directory' && (
+        {currentRole === 'hod' && visibleTab === 'faculty-directory' && (
           <FacultyDirectory />
         )}
-        {activeTab === 'reports' && (
+        {currentRole === 'hod' && visibleTab === 'reports' && (
           <ReportsPage />
         )}
+        {currentRole === 'faculty' && visibleTab === 'my-absence-requests' && <FacultyAbsenceRequests />}
+        {currentRole === 'faculty' && visibleTab === 'faculty-notifications' && <FacultyNotifications />}
+        {currentRole === 'faculty' && visibleTab === 'faculty-profile' && <FacultyProfile />}
       </AppLayout>
 
       {/* Printable Notice Slip Modal */}

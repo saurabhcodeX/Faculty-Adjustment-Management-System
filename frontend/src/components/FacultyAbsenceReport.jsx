@@ -8,14 +8,14 @@ import {
 
 export default function FacultyAbsenceReport() {
   const {
-    facultyList, timetables, currentFacultyId,
+    facultyList, timetables, currentFacultyId, user,
     selectedDate, selectedDay, setSelectedDate, setSelectedDay,
     DAYS_OF_WEEK, PERIODS,
     reportAbsence, setActiveTab, currentRole,
     showToast, showConfirm
   } = useApp();
 
-  const [facultyId, setFacultyId] = useState(currentFacultyId || 'f2');
+  const [facultyId, setFacultyId] = useState(currentRole === 'hod' ? currentFacultyId : user.id);
   const [date, setDate] = useState(selectedDate);
   const [dayOfWeek, setDayOfWeek] = useState(selectedDay);
   const [leaveType, setLeaveType] = useState('Casual Leave');
@@ -24,7 +24,7 @@ export default function FacultyAbsenceReport() {
   const [selectAllBusy, setSelectAllBusy] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => { if (currentFacultyId) setFacultyId(currentFacultyId); }, [currentFacultyId]);
+  useEffect(() => { setFacultyId(currentRole === 'hod' ? (currentFacultyId || '') : user.id); }, [currentFacultyId, currentRole, user.id]);
   useEffect(() => { setDate(selectedDate); setDayOfWeek(selectedDay); }, [selectedDate, selectedDay]);
 
   const dailySchedule = getTeacherScheduleForDay(facultyId, dayOfWeek, timetables);
@@ -92,7 +92,8 @@ export default function FacultyAbsenceReport() {
     if (goToHod) setActiveTab('hod-requests');
   };
 
-  const selectedFaculty = facultyList.find(f => f.id === facultyId);
+  const selectedFaculty = currentRole === 'hod' ? facultyList.find(f => f.id === facultyId) : user;
+  const selectableFaculty = currentRole === 'hod' ? facultyList : [user];
 
   return (
     <div className="faculty-absence-container">
@@ -122,7 +123,7 @@ export default function FacultyAbsenceReport() {
             <div className="form-field">
               <label className="field-label"><User size={14} /><span>Faculty Member</span></label>
               <select value={facultyId} onChange={(e) => setFacultyId(e.target.value)} className="input-select" disabled={currentRole !== 'hod'} required>
-                {facultyList.map(f => (
+                {selectableFaculty.map(f => (
                   <option key={f.id} value={f.id}>{f.name} — {f.designation}</option>
                 ))}
               </select>
