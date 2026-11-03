@@ -15,7 +15,11 @@ import {
   MapPin,
   ShieldAlert,
   TrendingUp,
-  UserCheck
+  UserCheck,
+  ClipboardList,
+  AlertCircle,
+  Calendar,
+  FileText
 } from 'lucide-react';
 
 export default function HodDashboard({ onOpenPrintModal }) {
@@ -37,6 +41,11 @@ export default function HodDashboard({ onOpenPrintModal }) {
   const rejectedRequests = absences.filter(a => a.status === 'Rejected');
   const todaysAdjustments = adjustments.filter(adj => adj.date === selectedDate);
 
+  // Compute pending substitute assignments:
+  // Approved absences that have NO adjustment record linked to them
+  const adjustedAbsenceIds = new Set(adjustments.map(adj => adj.absenceId));
+  const unassignedApproved = approvedRequests.filter(a => !adjustedAbsenceIds.has(a.id));
+
   // Faculty with at least one timetable entry (available today concept)
   const absentTodayIds = new Set(todaysAbsences.filter(a => a.status !== 'Rejected').map(a => a.facultyId));
   const availableToday = facultyList.filter(f => !absentTodayIds.has(f.id)).length;
@@ -44,7 +53,7 @@ export default function HodDashboard({ onOpenPrintModal }) {
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
-  // Recent absences (last 10)
+  // Recent absences (last 8)
   const recentAbsences = [...absences]
     .sort((a, b) => new Date(b.reportedAt || b.date) - new Date(a.reportedAt || a.date))
     .slice(0, 8);
@@ -60,6 +69,16 @@ export default function HodDashboard({ onOpenPrintModal }) {
       periodsToAdjust: [6, 7, 8]
     });
     if (created) setActiveTab('hod-requests');
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    try {
+      const d = new Date(dateString + 'T00:00:00');
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateString;
+    }
   };
 
   return (
@@ -89,6 +108,17 @@ export default function HodDashboard({ onOpenPrintModal }) {
 
         <div className="fams-stat-card">
           <div className="fams-stat-card__info">
+            <div className="fams-stat-card__label">Approved Leaves</div>
+            <div className="fams-stat-card__value">{approvedRequests.length}</div>
+            <div className="fams-stat-card__sub">Total approved absences</div>
+          </div>
+          <div className="fams-stat-card__icon fams-stat-card__icon--green">
+            <CheckCircle2 size={22} />
+          </div>
+        </div>
+
+        <div className="fams-stat-card">
+          <div className="fams-stat-card__info">
             <div className="fams-stat-card__label">Pending Requests</div>
             <div className="fams-stat-card__value">{pendingRequests.length}</div>
             <div className="fams-stat-card__sub">Awaiting your review</div>
@@ -100,23 +130,14 @@ export default function HodDashboard({ onOpenPrintModal }) {
 
         <div className="fams-stat-card">
           <div className="fams-stat-card__info">
-            <div className="fams-stat-card__label">Today's Adjustments</div>
-            <div className="fams-stat-card__value">{todaysAdjustments.length}</div>
-            <div className="fams-stat-card__sub">Substitutions active</div>
+            <div className="fams-stat-card__label">Pending Assignments</div>
+            <div className="fams-stat-card__value" style={unassignedApproved.length > 0 ? { color: 'var(--fams-danger)' } : {}}>
+              {unassignedApproved.length}
+            </div>
+            <div className="fams-stat-card__sub">Need substitute assignment</div>
           </div>
-          <div className="fams-stat-card__icon fams-stat-card__icon--teal">
-            <Shuffle size={22} />
-          </div>
-        </div>
-
-        <div className="fams-stat-card">
-          <div className="fams-stat-card__info">
-            <div className="fams-stat-card__label">Available Today</div>
-            <div className="fams-stat-card__value">{availableToday}</div>
-            <div className="fams-stat-card__sub">Not on leave</div>
-          </div>
-          <div className="fams-stat-card__icon fams-stat-card__icon--green">
-            <UserCheck size={22} />
+          <div className="fams-stat-card__icon fams-stat-card__icon--indigo">
+            <ClipboardList size={22} />
           </div>
         </div>
       </div>
@@ -132,7 +153,7 @@ export default function HodDashboard({ onOpenPrintModal }) {
               {pendingRequests.length} Pending Absence Request{pendingRequests.length > 1 ? 's' : ''}
             </div>
             <div className="fams-alert__desc">
-              Faculty reported absence. Free teachers need to be assigned.
+              Faculty reported absence. Review and approve or reject.
             </div>
           </div>
           <div className="fams-alert__action">
@@ -143,8 +164,127 @@ export default function HodDashboard({ onOpenPrintModal }) {
         </div>
       )}
 
+      {/* Alert for pending substitute assignments */}
+      {unassignedApproved.length > 0 && (
+        <div className="fams-alert fams-alert--info">
+          <div className="fams-alert__icon">
+            <ClipboardList size={20} />
+          </div>
+          <div className="fams-alert__content">
+            <div className="fams-alert__title">
+              {unassignedApproved.length} Approved Absence{unassignedApproved.length > 1 ? 's' : ''} Without Substitute
+            </div>
+            <div className="fams-alert__desc">
+              Approved leaves need substitute faculty assignments. Assign substitutes to ensure class coverage.
+            </div>
+          </div>
+          <div className="fams-alert__action">
+            <button className="fams-btn fams-btn--primary fams-btn--sm" onClick={() => setActiveTab('hod-requests')}>
+              Assign Now <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Pending Substitute Assignments Table */}
+      <div className="fams-card" style={{ marginTop: 20 }}>
+        <div className="fams-card__header">
+          <div>
+            <div className="fams-card__title">
+              <ClipboardList size={16} /> Pending Substitute Assignments
+            </div>
+            <div className="fams-card__subtitle">
+              Approved absences awaiting substitute faculty assignment
+            </div>
+          </div>
+          {unassignedApproved.length > 0 && (
+            <button className="fams-btn fams-btn--primary fams-btn--sm" onClick={() => setActiveTab('hod-requests')}>
+              <ShieldAlert size={14} /> Open Adjustment Console
+            </button>
+          )}
+        </div>
+        <div className="fams-card__body fams-card__body--flush">
+          {unassignedApproved.length === 0 ? (
+            <div className="fams-empty">
+              <div className="fams-empty__icon">
+                <CheckCircle2 size={26} />
+              </div>
+              <div className="fams-empty__title">All Assignments Complete</div>
+              <div className="fams-empty__desc">
+                Every approved absence has a substitute assigned. Great job!
+              </div>
+            </div>
+          ) : (
+            <div className="fams-table-wrap">
+              <table className="fams-table">
+                <thead>
+                  <tr>
+                    <th>Requesting Faculty</th>
+                    <th>Absence Date</th>
+                    <th>Reason</th>
+                    <th>Leave Type</th>
+                    <th>Approval Status</th>
+                    <th>Assignment Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {unassignedApproved.map((absence) => (
+                    <tr key={absence.id}>
+                      <td>
+                        <div style={{ fontWeight: 600, color: 'var(--fams-gray-800)' }}>
+                          {absence.facultyName}
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--fams-gray-400)' }}>
+                          {absence.dayOfWeek}
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13 }}>
+                          <Calendar size={13} style={{ color: 'var(--fams-gray-400)' }} />
+                          {formatDate(absence.date)}
+                        </span>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 13, color: 'var(--fams-gray-600)' }}>
+                          {absence.reason}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="fams-badge fams-badge--blue" style={{ fontSize: 11 }}>
+                          {absence.leaveType || 'Not specified'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="fams-badge fams-badge--green">
+                          <CheckCircle2 size={11} /> Approved
+                        </span>
+                      </td>
+                      <td>
+                        <span className="fams-badge fams-badge--amber" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <AlertCircle size={11} /> Pending Assignment
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className="fams-btn fams-btn--primary fams-btn--sm"
+                          onClick={() => setActiveTab('hod-requests')}
+                          title="Open Adjustment Console to assign a substitute"
+                        >
+                          <Shuffle size={13} /> Assign Substitute
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Quick Actions */}
-      <div className="fams-quick-actions">
+      <div className="fams-quick-actions" style={{ marginTop: 20 }}>
         <button className="fams-quick-action" onClick={() => setActiveTab('hod-requests')}>
           <div className="fams-quick-action__icon">
             <ShieldAlert size={20} />
@@ -187,7 +327,7 @@ export default function HodDashboard({ onOpenPrintModal }) {
       </div>
 
       {/* Main Grid */}
-      <div className="fams-grid fams-grid--2-1">
+      <div className="fams-grid fams-grid--2-1" style={{ marginTop: 20 }}>
         {/* Today's Notice Board */}
         <div className="fams-card">
           <div className="fams-card__header">
@@ -364,4 +504,3 @@ export default function HodDashboard({ onOpenPrintModal }) {
     </div>
   );
 }
-
