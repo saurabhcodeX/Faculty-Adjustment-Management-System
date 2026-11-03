@@ -9,7 +9,11 @@ import {
   Check,
   Calendar,
   Layers,
-  Edit2
+  Edit2,
+  X,
+  BookOpen,
+  MapPin,
+  AlertCircle
 } from 'lucide-react';
 
 export default function TimetableEditor() {
@@ -29,12 +33,10 @@ export default function TimetableEditor() {
   const [selectedDay, setSelectedDay] = useState('Monday');
   const [editingPeriod, setEditingPeriod] = useState(null);
 
-  // Form states for adding/editing a period
   const [subject, setSubject] = useState('');
   const [classGroup, setClassGroup] = useState('');
   const [room, setRoom] = useState('');
 
-  // New Faculty Modal/Form state
   const [showAddFaculty, setShowAddFaculty] = useState(false);
   const [newFacultyName, setNewFacultyName] = useState('');
   const [newFacultyDesignation, setNewFacultyDesignation] = useState('Assistant Professor');
@@ -60,29 +62,34 @@ export default function TimetableEditor() {
     setEditingPeriod(periodId);
   };
 
-  const handleSavePeriod = async (periodId) => {
-    const classData = subject.trim()
-      ? {
-          subject: subject.trim(),
-          classGroup: classGroup.trim() || 'General',
-          room: room.trim() || 'Room 101'
-        }
-      : null;
-    const saved = await updateTimetableCell(selectedFacultyId, selectedDay, periodId, classData);
-    if (saved) setEditingPeriod(null);
+  const handleSavePeriod = async () => {
+    await updateTimetableCell(selectedFacultyId, selectedDay, editingPeriod, {
+      subject: subject.trim(),
+      classGroup: classGroup.trim(),
+      room: room.trim()
+    });
+    setEditingPeriod(null);
   };
 
-  const handleSetFree = async (periodId) => {
-    const saved = await updateTimetableCell(selectedFacultyId, selectedDay, periodId, null);
-    if (saved) setEditingPeriod(null);
+  const handleClearPeriod = async (periodId) => {
+    const ok = await showConfirm({
+      title: 'Clear Period?',
+      message: `Remove the class assigned to ${selectedFaculty.name} on ${selectedDay}, Lecture ${periodId}?`,
+      confirmLabel: 'Clear',
+      cancelLabel: 'Cancel',
+      variant: 'warning'
+    });
+    if (ok) {
+      await updateTimetableCell(selectedFacultyId, selectedDay, periodId, {
+        subject: '', classGroup: '', room: ''
+      });
+    }
   };
 
-  const handleAddFaculty = async (e) => {
-    e.preventDefault();
-    if (!newFacultyName.trim()) return;
-
+  const handleAddFaculty = async () => {
+    if (!newFacultyName.trim() || !newFacultyEmail.trim() || !newFacultyPassword.trim()) return;
     setAddingFaculty(true);
-    const created = await addFaculty({
+    await addFaculty({
       name: newFacultyName.trim(),
       designation: newFacultyDesignation,
       department: newFacultyDept,
@@ -90,9 +97,6 @@ export default function TimetableEditor() {
       password: newFacultyPassword
     });
     setAddingFaculty(false);
-    if (!created) return;
-
-    setSelectedFacultyId(created.id);
     setShowAddFaculty(false);
     setNewFacultyName('');
     setNewFacultyEmail('');
@@ -101,317 +105,250 @@ export default function TimetableEditor() {
 
   const handleRemoveFaculty = async () => {
     const confirmed = await showConfirm({
-      title: `Remove ${selectedFaculty.name}?`,
-      message: 'This deletes their account and timetable. Teachers with absence or adjustment records cannot be removed.',
-      confirmLabel: 'Remove Teacher',
-      cancelLabel: 'Keep',
+      title: 'Remove Faculty?',
+      message: `Are you sure you want to remove ${selectedFaculty.name}? This cannot be undone if they have absence or adjustment history.`,
+      confirmLabel: 'Remove',
+      cancelLabel: 'Cancel',
       variant: 'danger'
     });
-    if (!confirmed) return;
-
-    const removed = await removeFaculty(selectedFaculty.id);
-    if (removed) {
-      setSelectedFacultyId(user.id);
-      setEditingPeriod(null);
+    if (confirmed) {
+      await removeFaculty(selectedFacultyId);
+      setSelectedFacultyId(facultyList[0]?.id || '');
     }
   };
 
-  return (
-    <div className="timetable-editor-container">
-      {/* Header */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="page-title flex items-center gap-2">
-            <Sliders className="text-indigo-600" size={24} />
-            <span>Faculty Timetable & Roster Manager</span>
-          </h1>
-          <p className="page-subtitle">
-            Configure individual timetables for each faculty member across all 8 daily lecture periods.
-          </p>
-        </div>
+  const busyCount = PERIODS.filter(p => facultySchedule[p.id]).length;
 
-        <div className="flex items-center gap-2">
-          {selectedFaculty && selectedFaculty.id !== user.id && (
-            <button
-              onClick={handleRemoveFaculty}
-              className="btn btn-outline text-rose-600 text-xs py-2 px-3 flex items-center gap-1.5"
-            >
-              <Trash2 size={15} />
-              <span>Remove Teacher</span>
-            </button>
-          )}
-          <button
-            onClick={() => setShowAddFaculty(true)}
-            className="btn btn-primary text-xs py-2 px-3 flex items-center gap-1.5"
-          >
-            <Plus size={15} />
-            <span>Add New Teacher</span>
+  return (
+    <div className="fams-page">
+      {/* Header */}
+      <div className="fams-page-header">
+        <div className="fams-page-header__row">
+          <div>
+            <h1 className="fams-page-title">
+              <Sliders size={24} />
+              <span>Timetable Manager</span>
+            </h1>
+            <p className="fams-page-subtitle">
+              Manage faculty schedules — assign subjects, classes, and rooms for each day and period.
+            </p>
+          </div>
+          <button onClick={() => setShowAddFaculty(!showAddFaculty)} className="fams-btn fams-btn--primary">
+            <Plus size={16} /> Add Faculty
           </button>
         </div>
       </div>
 
-      {/* Selector Controls */}
-      <div className="card p-4 mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-              Select Teacher:
-            </label>
-            <select
-              value={selectedFacultyId}
-              onChange={(e) => {
-                setSelectedFacultyId(e.target.value);
-                setEditingPeriod(null);
-              }}
-              className="input-select text-sm w-full"
-            >
-              {facultyList.map(f => (
-                <option key={f.id} value={f.id}>
-                  {f.name} — {f.designation}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-              Select Day:
-            </label>
-            <select
-              value={selectedDay}
-              onChange={(e) => {
-                setSelectedDay(e.target.value);
-                setEditingPeriod(null);
-              }}
-              className="input-select text-sm w-full"
-            >
-              {DAYS_OF_WEEK.map(d => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* 8 Periods Grid for Selected Teacher */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {PERIODS.map(period => {
-          const currentClass = facultySchedule[period.id];
-          const isEditing = editingPeriod === period.id;
-
-          return (
-            <div
-              key={period.id}
-              className={`card p-4 ${currentClass ? 'border-l-4 border-l-indigo-500' : 'border-dashed'}`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-900 text-sm">
-                    {period.label}
-                  </span>
-                  <span className="text-xs text-slate-500 font-mono">
-                    ({period.time})
-                  </span>
-                </div>
-
-                {!isEditing && (
-                  <button
-                    onClick={() => handleStartEdit(period.id)}
-                    className="btn btn-outline btn-sm text-xs py-1 px-2.5 flex items-center gap-1"
-                  >
-                    <Edit2 size={12} />
-                    <span>{currentClass ? 'Edit' : '+ Assign Class'}</span>
-                  </button>
-                )}
-              </div>
-
-              {isEditing ? (
-                <div className="space-y-2.5 pt-2 border-t mt-2">
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-500 uppercase block">Subject Name</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Operating Systems"
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      className="input-text text-xs py-1.5"
-                      autoFocus
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-semibold text-slate-500 uppercase block">Class / Batch</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. CS-3A"
-                        value={classGroup}
-                        onChange={(e) => setClassGroup(e.target.value)}
-                        className="input-text text-xs py-1.5"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-semibold text-slate-500 uppercase block">Room / Lab</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Room 204"
-                        value={room}
-                        onChange={(e) => setRoom(e.target.value)}
-                        className="input-text text-xs py-1.5"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-2">
-                    <button
-                      type="button"
-                      onClick={() => handleSetFree(period.id)}
-                      className="text-xs text-rose-600 hover:underline"
-                    >
-                      Set to Free Period
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setEditingPeriod(null)}
-                        className="btn btn-outline btn-sm text-xs py-1 px-2.5"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleSavePeriod(period.id)}
-                        className="btn btn-primary btn-sm text-xs py-1 px-3 flex items-center gap-1"
-                      >
-                        <Check size={13} />
-                        <span>Save</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="pt-2">
-                  {currentClass ? (
-                    <div>
-                      <div className="font-semibold text-slate-800 text-sm">
-                        {currentClass.subject}
-                      </div>
-                      <div className="text-xs text-slate-500 flex items-center gap-3 mt-1">
-                        <span className="badge-tag tag-neutral">{currentClass.classGroup}</span>
-                        <span>Room: {currentClass.room || 'Room 101'}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-xs text-slate-400 italic py-1">
-                      Free Period (No class assigned)
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Add New Teacher Modal */}
+      {/* Add Faculty Form */}
       {showAddFaculty && (
-        <div className="modal-backdrop">
-          <div className="modal-dialog max-w-md">
-            <div className="modal-header border-b p-4 flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-base">Add New Faculty Member</h3>
-              <button
-                onClick={() => setShowAddFaculty(false)}
-                className="text-slate-400 hover:text-slate-700"
-              >
-                ✕
-              </button>
-            </div>
-            <form onSubmit={handleAddFaculty} className="p-4 space-y-3">
-              <div>
-                <label className="field-label">Full Name & Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dr. Sunita Mehra"
-                  value={newFacultyName}
-                  onChange={(e) => setNewFacultyName(e.target.value)}
-                  className="input-text"
-                  required
-                />
+        <div className="fams-card" style={{ marginBottom: 20 }}>
+          <div className="fams-card__header">
+            <div className="fams-card__title"><Plus size={16} /> Add New Faculty Member</div>
+            <button className="fams-btn fams-btn--ghost fams-btn--sm" onClick={() => setShowAddFaculty(false)}>
+              <X size={14} /> Cancel
+            </button>
+          </div>
+          <div className="fams-card__body">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 14 }}>
+              <div className="fams-form-field" style={{ marginBottom: 0 }}>
+                <label className="fams-field-label"><User size={13} /> Full Name</label>
+                <input value={newFacultyName} onChange={e => setNewFacultyName(e.target.value)} className="fams-input fams-input--sm" placeholder="e.g. Dr. Saurabh Singh" />
               </div>
-
-              <div>
-                <label className="field-label">Login Email</label>
-                <input
-                  type="email"
-                  placeholder="e.g. sunita.mehra@college.edu"
-                  autoComplete="off"
-                  value={newFacultyEmail}
-                  onChange={(e) => setNewFacultyEmail(e.target.value)}
-                  className="input-text"
-                  required
-                />
+              <div className="fams-form-field" style={{ marginBottom: 0 }}>
+                <label className="fams-field-label">Email</label>
+                <input value={newFacultyEmail} onChange={e => setNewFacultyEmail(e.target.value)} className="fams-input fams-input--sm" placeholder="email@college.edu" type="email" />
               </div>
-
-              <div>
-                <label className="field-label">Temporary Password</label>
-                <input
-                  type="password"
-                  placeholder="At least 8 characters"
-                  autoComplete="new-password"
-                  minLength={8}
-                  value={newFacultyPassword}
-                  onChange={(e) => setNewFacultyPassword(e.target.value)}
-                  className="input-text"
-                  required
-                />
+              <div className="fams-form-field" style={{ marginBottom: 0 }}>
+                <label className="fams-field-label">Password</label>
+                <input value={newFacultyPassword} onChange={e => setNewFacultyPassword(e.target.value)} className="fams-input fams-input--sm" placeholder="Temporary password" type="password" />
               </div>
-
-              <div>
-                <label className="field-label">Designation</label>
-                <select
-                  value={newFacultyDesignation}
-                  onChange={(e) => setNewFacultyDesignation(e.target.value)}
-                  className="input-select"
-                >
-                  <option value="Professor">Professor</option>
-                  <option value="Associate Professor">Associate Professor</option>
-                  <option value="Assistant Professor">Assistant Professor</option>
-                  <option value="Lecturer">Lecturer</option>
-                  <option value="Teaching Assistant">Teaching Assistant</option>
+              <div className="fams-form-field" style={{ marginBottom: 0 }}>
+                <label className="fams-field-label">Designation</label>
+                <select value={newFacultyDesignation} onChange={e => setNewFacultyDesignation(e.target.value)} className="fams-input fams-input--sm">
+                  <option>Assistant Professor</option>
+                  <option>Associate Professor</option>
+                  <option>Professor</option>
+                  <option>Lecturer</option>
                 </select>
               </div>
-
-              <div>
-                <label className="field-label">Department</label>
-                <input
-                  type="text"
-                  value={newFacultyDept}
-                  onChange={(e) => setNewFacultyDept(e.target.value)}
-                  className="input-text"
-                />
+              <div className="fams-form-field" style={{ marginBottom: 0 }}>
+                <label className="fams-field-label">Department</label>
+                <select value={newFacultyDept} onChange={e => setNewFacultyDept(e.target.value)} className="fams-input fams-input--sm">
+                  <option>Computer Science</option>
+                  <option>Information Technology</option>
+                  <option>Electronics</option>
+                  <option>Mathematics</option>
+                </select>
               </div>
-
-              <div className="pt-3 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddFaculty(false)}
-                  className="btn btn-outline btn-sm"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary btn-sm"
-                  disabled={addingFaculty}
-                >
-                  {addingFaculty ? 'Adding...' : 'Add Teacher'}
-                </button>
-              </div>
-            </form>
+            </div>
+            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end' }}>
+              <button onClick={handleAddFaculty} className="fams-btn fams-btn--primary fams-btn--sm" disabled={addingFaculty || !newFacultyName.trim() || !newFacultyEmail.trim() || !newFacultyPassword.trim()}>
+                <Save size={14} /> {addingFaculty ? 'Adding...' : 'Save Faculty'}
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Faculty & Day Selector */}
+      <div className="fams-card" style={{ marginBottom: 20 }}>
+        <div className="fams-card__body" style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <label className="fams-field-label"><User size={13} /> Faculty Member</label>
+            <select value={selectedFacultyId} onChange={e => setSelectedFacultyId(e.target.value)} className="fams-input">
+              {facultyList.map(f => (
+                <option key={f.id} value={f.id}>{f.name} — {f.designation}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="fams-field-label"><Calendar size={13} /> Day</label>
+            <div className="fams-filter-group">
+              {DAYS_OF_WEEK.map(day => (
+                <button
+                  key={day}
+                  onClick={() => setSelectedDay(day)}
+                  className={`fams-filter-pill ${selectedDay === day ? 'fams-filter-pill--active' : ''}`}
+                >
+                  {day.substring(0, 3)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {selectedFaculty && selectedFaculty.id !== user.id && (
+            <div style={{ marginLeft: 'auto' }}>
+              <button onClick={handleRemoveFaculty} className="fams-btn fams-btn--danger fams-btn--sm">
+                <Trash2 size={14} /> Remove
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Faculty Info */}
+      {selectedFaculty && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div className="fams-faculty-avatar">{selectedFaculty.name?.charAt(0)}</div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--fams-gray-900)' }}>{selectedFaculty.name}</div>
+            <div style={{ fontSize: 12, color: 'var(--fams-gray-500)' }}>
+              {selectedFaculty.designation} • {selectedFaculty.department} • {selectedDay} • {busyCount} lecture{busyCount !== 1 ? 's' : ''}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8-Period Grid */}
+      <div className="fams-card">
+        <div className="fams-card__header">
+          <div className="fams-card__title">
+            <BookOpen size={16} /> {selectedDay}'s Schedule
+          </div>
+          <div className="fams-card__subtitle">
+            Click Edit to assign or modify classes
+          </div>
+        </div>
+        <div className="fams-card__body fams-card__body--flush">
+          <div className="fams-table-wrap">
+            <table className="fams-table">
+              <thead>
+                <tr>
+                  <th>Period</th>
+                  <th>Time</th>
+                  <th>Subject</th>
+                  <th>Class</th>
+                  <th>Room</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PERIODS.map(period => {
+                  const cell = facultySchedule[period.id];
+                  const isEditing = editingPeriod === period.id;
+
+                  if (isEditing) {
+                    return (
+                      <tr key={period.id} style={{ background: 'var(--fams-info-bg)' }}>
+                        <td>
+                          <div style={{ fontWeight: 600, color: 'var(--fams-gray-800)' }}>L{period.id}</div>
+                        </td>
+                        <td>
+                          <span style={{ fontSize: 12, color: 'var(--fams-gray-500)' }}>{period.time}</span>
+                        </td>
+                        <td>
+                          <input value={subject} onChange={e => setSubject(e.target.value)} className="fams-input fams-input--sm" placeholder="Subject name" />
+                        </td>
+                        <td>
+                          <input value={classGroup} onChange={e => setClassGroup(e.target.value)} className="fams-input fams-input--sm" placeholder="e.g. CSE-A" />
+                        </td>
+                        <td>
+                          <input value={room} onChange={e => setRoom(e.target.value)} className="fams-input fams-input--sm" placeholder="e.g. R-301" />
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                            <button onClick={handleSavePeriod} className="fams-btn fams-btn--primary fams-btn--sm">
+                              <Check size={13} /> Save
+                            </button>
+                            <button onClick={() => setEditingPeriod(null)} className="fams-btn fams-btn--ghost fams-btn--sm">
+                              <X size={13} /> Cancel
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }
+
+                  return (
+                    <tr key={period.id}>
+                      <td>
+                        <div style={{ fontWeight: 600, color: 'var(--fams-gray-800)' }}>L{period.id}</div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 12, color: 'var(--fams-gray-500)' }}>{period.time}</span>
+                      </td>
+                      <td>
+                        {cell?.subject ? (
+                          <span style={{ fontWeight: 500, color: 'var(--fams-gray-800)' }}>{cell.subject}</span>
+                        ) : (
+                          <span style={{ color: 'var(--fams-gray-400)', fontStyle: 'italic', fontSize: 12 }}>Free Period</span>
+                        )}
+                      </td>
+                      <td>
+                        {cell?.classGroup ? (
+                          <span className="fams-badge fams-badge--gray">{cell.classGroup}</span>
+                        ) : (
+                          <span style={{ color: 'var(--fams-gray-300)' }}>—</span>
+                        )}
+                      </td>
+                      <td>
+                        {cell?.room ? (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 12, color: 'var(--fams-gray-600)' }}>
+                            <MapPin size={12} style={{ color: 'var(--fams-gray-400)' }} /> {cell.room}
+                          </span>
+                        ) : (
+                          <span style={{ color: 'var(--fams-gray-300)' }}>—</span>
+                        )}
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                          <button onClick={() => handleStartEdit(period.id)} className="fams-btn fams-btn--secondary fams-btn--sm">
+                            <Edit2 size={12} /> Edit
+                          </button>
+                          {cell?.subject && (
+                            <button onClick={() => handleClearPeriod(period.id)} className="fams-btn fams-btn--ghost fams-btn--sm" style={{ color: 'var(--fams-danger)' }}>
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
-

@@ -32,7 +32,8 @@ export default function HodDashboard({ onOpenPrintModal }) {
     setActiveTab,
     demoMode,
     PERIODS,
-    reportAbsence
+    reportAbsence,
+    user
   } = useApp();
 
   const todaysAbsences = absences.filter(a => a.date === selectedDate);
@@ -85,8 +86,8 @@ export default function HodDashboard({ onOpenPrintModal }) {
     <div>
       {/* Welcome Banner */}
       <div className="fams-welcome">
-        <div className="fams-welcome__greeting">Welcome back, Admin</div>
-        <div className="fams-welcome__name">Department Overview</div>
+        <div className="fams-welcome__greeting">Welcome back, {user?.name?.split(' ')[0] || 'Admin'}</div>
+        <div className="fams-welcome__name">{user?.department || 'Department'} Overview</div>
         <div className="fams-welcome__info">
           <span><Clock size={13} /> {dateStr}</span>
           <span><Users size={13} /> {facultyList.length} Faculty Members</span>

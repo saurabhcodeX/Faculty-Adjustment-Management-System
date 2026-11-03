@@ -30,290 +30,237 @@ export default function MasterTimetableView({ onOpenPrintModal }) {
   const [hoveredFacultyId, setHoveredFacultyId] = useState(null);
   const [hoveredPeriodId, setHoveredPeriodId] = useState(null);
 
-  // Find adjustments for the selected date or day
   const relevantAdjustments = adjustments.filter(
     adj => adj.date === selectedDate || adj.dayOfWeek === selectedDay
   );
 
-  // Find absent teachers for today
   const absentTeacherIds = absences
     .filter(a => (a.date === selectedDate || a.dayOfWeek === selectedDay) && a.status === 'Approved')
     .map(a => a.facultyId);
 
-  // Calculate statistics
   const totalFaculty = facultyList.length;
   const totalAbsent = absentTeacherIds.length;
   const totalAdjustments = relevantAdjustments.length;
   const totalSubstitutes = relevantAdjustments.filter(adj => adj.substituteFacultyId).length;
 
   return (
-    <div className="master-timetable-container">
-      {/* Premium Header */}
-      <div className="timetable-header-premium">
-        <div className="header-content">
+    <div className="fams-page">
+      {/* Header */}
+      <div className="fams-page-header">
+        <div className="fams-page-header__row">
           <div>
-            <h1 className="page-title premium-title flex items-center gap-3">
-              <div className="icon-badge badge-indigo">
-                <CalendarDays size={24} />
-              </div>
+            <h1 className="fams-page-title">
+              <CalendarDays size={24} />
               <span>Master Timetable</span>
             </h1>
-            <p className="page-subtitle mt-2">
+            <p className="fams-page-subtitle">
               Department-wide view across all 8 periods with live adjustments and substitute assignments
             </p>
           </div>
-
-          <button
-            onClick={onOpenPrintModal}
-            className="btn btn-primary print-btn-premium hover-lift"
-            title="Generate printable notice slip for notice board"
-          >
-            <Printer size={16} />
-            <span>Print Slip</span>
+          <button onClick={onOpenPrintModal} className="fams-btn fams-btn--primary">
+            <Printer size={16} /> Print Slip
           </button>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="stats-grid-premium">
-          <div className="stat-card-premium">
-            <div className="stat-icon-wrapper blue">
-              <Users size={18} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">Total Faculty</span>
-              <span className="stat-value">{totalFaculty}</span>
-            </div>
-          </div>
-
-          <div className="stat-card-premium">
-            <div className="stat-icon-wrapper rose">
-              <AlertCircle size={18} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">On Leave</span>
-              <span className="stat-value">{totalAbsent}</span>
-            </div>
-          </div>
-
-          <div className="stat-card-premium">
-            <div className="stat-icon-wrapper emerald">
-              <Zap size={18} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">Adjustments</span>
-              <span className="stat-value">{totalAdjustments}</span>
-            </div>
-          </div>
-
-          <div className="stat-card-premium">
-            <div className="stat-icon-wrapper amber">
-              <Sparkles size={18} />
-            </div>
-            <div className="stat-info">
-              <span className="stat-label">Substitutes</span>
-              <span className="stat-value">{totalSubstitutes}</span>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Day Selector - Enhanced */}
-      <div className="day-selector-container">
-        <div className="day-selector-label">
-          <Clock size={16} className="text-slate-500" />
-          <span>Select Day:</span>
+      {/* Stats */}
+      <div className="fams-stats-grid" style={{ marginBottom: 20 }}>
+        <div className="fams-stat-card">
+          <div className="fams-stat-card__info">
+            <div className="fams-stat-card__label">Total Faculty</div>
+            <div className="fams-stat-card__value">{totalFaculty}</div>
+          </div>
+          <div className="fams-stat-card__icon fams-stat-card__icon--blue"><Users size={20} /></div>
         </div>
-        <div className="day-tabs-bar-premium">
+        <div className="fams-stat-card">
+          <div className="fams-stat-card__info">
+            <div className="fams-stat-card__label">On Leave</div>
+            <div className="fams-stat-card__value">{totalAbsent}</div>
+          </div>
+          <div className="fams-stat-card__icon fams-stat-card__icon--red"><AlertCircle size={20} /></div>
+        </div>
+        <div className="fams-stat-card">
+          <div className="fams-stat-card__info">
+            <div className="fams-stat-card__label">Adjustments</div>
+            <div className="fams-stat-card__value">{totalAdjustments}</div>
+          </div>
+          <div className="fams-stat-card__icon fams-stat-card__icon--green"><Zap size={20} /></div>
+        </div>
+        <div className="fams-stat-card">
+          <div className="fams-stat-card__info">
+            <div className="fams-stat-card__label">Substitutes</div>
+            <div className="fams-stat-card__value">{totalSubstitutes}</div>
+          </div>
+          <div className="fams-stat-card__icon fams-stat-card__icon--amber"><Sparkles size={20} /></div>
+        </div>
+      </div>
+
+      {/* Day Selector */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 600, color: 'var(--fams-gray-500)' }}>
+          <Clock size={15} /> Select Day:
+        </div>
+        <div className="fams-filter-group">
           {DAYS_OF_WEEK.map(day => (
             <button
               key={day}
               onClick={() => setSelectedDay(day)}
-              className={`day-tab-btn-premium ${selectedDay === day ? 'active' : ''}`}
+              className={`fams-filter-pill ${selectedDay === day ? 'fams-filter-pill--active' : ''}`}
             >
-              <span className="day-name">{day.substring(0, 3)}</span>
-              <span className="day-full">{day}</span>
+              {day.substring(0, 3)}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Enhanced Legend */}
-      <div className="timetable-legend-premium">
-        <div className="legend-title">Legend:</div>
-        <div className="legend-items-grid">
-          <div className="legend-item-premium">
-            <div className="legend-swatch legend-regular"></div>
-            <span>Regular Class</span>
-          </div>
-          <div className="legend-item-premium">
-            <div className="legend-swatch legend-free"></div>
-            <span>Free Period</span>
-          </div>
-          <div className="legend-item-premium">
-            <div className="legend-swatch legend-absent"></div>
-            <span>Class Reassigned</span>
-          </div>
-          <div className="legend-item-premium">
-            <div className="legend-swatch legend-proxy"></div>
-            <span>Proxy Duty</span>
-          </div>
-        </div>
+      {/* Legend */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16, flexWrap: 'wrap', fontSize: 11, color: 'var(--fams-gray-500)' }}>
+        <span style={{ fontWeight: 600, color: 'var(--fams-gray-600)' }}>Legend:</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--fams-white)', border: '1px solid var(--fams-gray-200)' }} /> Regular
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--fams-gray-50)', border: '1px solid var(--fams-gray-200)' }} /> Free
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--fams-danger-bg)', border: '1px solid var(--fams-danger-border)' }} /> Reassigned
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <span style={{ width: 12, height: 12, borderRadius: 3, background: 'var(--fams-success-bg)', border: '1px solid var(--fams-success-border)' }} /> Proxy Duty
+        </span>
       </div>
 
-      {/* The 8-Lecture Grid Table - Enhanced */}
-      <div className="card table-card-premium overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="master-table-enhanced">
-            <thead>
-              <tr>
-                <th className="sticky-col faculty-header-premium">Faculty Member</th>
-                {PERIODS.map(period => (
-                  <th
-                    key={period.id}
-                    className={`period-col-header-premium ${hoveredPeriodId === period.id ? 'highlighted' : ''}`}
-                    onMouseEnter={() => setHoveredPeriodId(period.id)}
-                    onMouseLeave={() => setHoveredPeriodId(null)}
-                  >
-                    <div className="period-label">{period.label}</div>
-                    <div className="period-time">{period.time}</div>
+      {/* Timetable Grid */}
+      <div className="fams-card">
+        <div className="fams-card__body fams-card__body--flush">
+          <div className="fams-table-wrap">
+            <table className="fams-table" style={{ fontSize: 12 }}>
+              <thead>
+                <tr>
+                  <th style={{ position: 'sticky', left: 0, background: 'var(--fams-gray-50)', zIndex: 2, minWidth: 180 }}>
+                    Faculty Member
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {facultyList.map(faculty => {
-                const isAbsent = absentTeacherIds.includes(faculty.id);
-                const schedule = timetables[faculty.id]?.[selectedDay] || {};
+                  {PERIODS.map(period => (
+                    <th
+                      key={period.id}
+                      style={{
+                        textAlign: 'center',
+                        minWidth: 110,
+                        background: hoveredPeriodId === period.id ? 'var(--fams-info-bg)' : undefined
+                      }}
+                      onMouseEnter={() => setHoveredPeriodId(period.id)}
+                      onMouseLeave={() => setHoveredPeriodId(null)}
+                    >
+                      <div>{period.label}</div>
+                      <div style={{ fontWeight: 400, fontSize: 10, marginTop: 1 }}>{period.time}</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {facultyList.map(faculty => {
+                  const isAbsent = absentTeacherIds.includes(faculty.id);
+                  const schedule = timetables[faculty.id]?.[selectedDay] || {};
 
-                return (
-                  <tr
-                    key={faculty.id}
-                    className={`faculty-row-enhanced ${isAbsent ? 'absent-faculty' : ''} ${hoveredFacultyId === faculty.id ? 'highlighted' : ''}`}
-                    onMouseEnter={() => setHoveredFacultyId(faculty.id)}
-                    onMouseLeave={() => setHoveredFacultyId(null)}
-                  >
-                    {/* Faculty Identity Column */}
-                    <td className="sticky-col faculty-cell-premium">
-                      <div className="faculty-name-wrapper">
-                        <div className="faculty-avatar">
-                          {getInitials(faculty.name)}
+                  return (
+                    <tr
+                      key={faculty.id}
+                      style={hoveredFacultyId === faculty.id ? { background: 'var(--fams-gray-50)' } : {}}
+                      onMouseEnter={() => setHoveredFacultyId(faculty.id)}
+                      onMouseLeave={() => setHoveredFacultyId(null)}
+                    >
+                      <td style={{ position: 'sticky', left: 0, background: 'var(--fams-white)', zIndex: 1, borderRight: '1px solid var(--fams-gray-200)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div className="fams-faculty-avatar" style={{ width: 30, height: 30, fontSize: 10 }}>
+                            {getInitials(faculty.name)}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: 12, color: 'var(--fams-gray-800)' }}>{faculty.name}</div>
+                            <div style={{ fontSize: 10, color: 'var(--fams-gray-400)' }}>{faculty.designation}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="faculty-name">{faculty.name}</div>
-                          <div className="faculty-designation">{faculty.designation}</div>
-                        </div>
-                      </div>
-                      {isAbsent && (
-                        <span className="badge-tag tag-rose absence-badge">
-                          <AlertCircle size={12} />
-                          On Leave
-                        </span>
-                      )}
-                    </td>
+                        {isAbsent && (
+                          <span className="fams-badge fams-badge--red" style={{ fontSize: 9, marginTop: 4 }}>
+                            <AlertCircle size={10} /> On Leave
+                          </span>
+                        )}
+                      </td>
 
-                    {/* 8 Periods */}
-                    {PERIODS.map(period => {
-                      const regularClass = schedule[period.id];
+                      {PERIODS.map(period => {
+                        const regularClass = schedule[period.id];
+                        const wasAdjustedOut = relevantAdjustments.find(
+                          adj => adj.originalFacultyId === faculty.id && adj.periodId === period.id
+                        );
+                        const isSubstitutedIn = relevantAdjustments.find(
+                          adj => adj.substituteFacultyId === faculty.id && adj.periodId === period.id
+                        );
 
-                      const wasAdjustedOut = relevantAdjustments.find(
-                        adj =>
-                          adj.originalFacultyId === faculty.id &&
-                          adj.periodId === period.id
-                      );
+                        const cellBg = hoveredPeriodId === period.id ? 'rgba(37,99,235,0.03)' : undefined;
 
-                      const isSubstitutedIn = relevantAdjustments.find(
-                        adj =>
-                          adj.substituteFacultyId === faculty.id &&
-                          adj.periodId === period.id
-                      );
+                        if (wasAdjustedOut) {
+                          return (
+                            <td key={period.id} style={{ background: cellBg || 'var(--fams-danger-bg)', textAlign: 'center', padding: '8px 6px' }}
+                              onMouseEnter={() => setHoveredPeriodId(period.id)} onMouseLeave={() => setHoveredPeriodId(null)}>
+                              <div style={{ textDecoration: 'line-through', opacity: 0.5, fontSize: 11, fontWeight: 500 }}>
+                                {wasAdjustedOut.subject}
+                              </div>
+                              <div style={{ fontSize: 10, color: 'var(--fams-gray-400)' }}>{wasAdjustedOut.classGroup}</div>
+                              <div style={{ fontSize: 10, color: 'var(--fams-success)', fontWeight: 600, marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+                                <Sparkles size={9} />
+                                {wasAdjustedOut.substituteFacultyName?.split(' ')[1] || wasAdjustedOut.substituteFacultyName}
+                              </div>
+                            </td>
+                          );
+                        }
 
-                      if (wasAdjustedOut) {
+                        if (isSubstitutedIn) {
+                          return (
+                            <td key={period.id} style={{ background: cellBg || 'var(--fams-success-bg)', textAlign: 'center', padding: '8px 6px' }}
+                              onMouseEnter={() => setHoveredPeriodId(period.id)} onMouseLeave={() => setHoveredPeriodId(null)}>
+                              <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--fams-success)', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+                                <Sparkles size={9} /> PROXY
+                              </div>
+                              <div style={{ fontWeight: 600, fontSize: 11, color: 'var(--fams-gray-800)', marginTop: 2 }}>
+                                {isSubstitutedIn.subject}
+                              </div>
+                              <div style={{ fontSize: 10, color: 'var(--fams-gray-500)' }}>
+                                {isSubstitutedIn.classGroup} • {isSubstitutedIn.room}
+                              </div>
+                              <div style={{ fontSize: 9, color: 'var(--fams-gray-400)', marginTop: 1 }}>
+                                for {isSubstitutedIn.originalFacultyName?.split(' ')[1] || isSubstitutedIn.originalFacultyName}
+                              </div>
+                            </td>
+                          );
+                        }
+
+                        if (regularClass) {
+                          return (
+                            <td key={period.id} style={{ background: cellBg, textAlign: 'center', padding: '8px 6px' }}
+                              onMouseEnter={() => setHoveredPeriodId(period.id)} onMouseLeave={() => setHoveredPeriodId(null)}>
+                              <div style={{ fontWeight: 600, fontSize: 11, color: 'var(--fams-gray-800)' }}>
+                                {regularClass.subject}
+                              </div>
+                              <div style={{ fontSize: 10, color: 'var(--fams-gray-400)' }}>{regularClass.classGroup}</div>
+                              <div style={{ fontSize: 10, color: 'var(--fams-gray-400)' }}>{regularClass.room || 'Room TBA'}</div>
+                            </td>
+                          );
+                        }
+
                         return (
-                          <td
-                            key={period.id}
-                            className={`cell-enhanced cell-adjusted-out-premium ${hoveredPeriodId === period.id ? 'period-highlighted' : ''}`}
-                            onMouseEnter={() => setHoveredPeriodId(period.id)}
-                            onMouseLeave={() => setHoveredPeriodId(null)}
-                          >
-                            <div className="class-title line-through opacity-60">
-                              {wasAdjustedOut.subject}
-                            </div>
-                            <div className="class-group-display">
-                              {wasAdjustedOut.classGroup}
-                            </div>
-                            <div className="proxy-indicator-premium">
-                              <Sparkles size={12} />
-                              <span>{wasAdjustedOut.substituteFacultyName.split(' ')[1] || wasAdjustedOut.substituteFacultyName}</span>
-                            </div>
+                          <td key={period.id} style={{ background: cellBg || 'var(--fams-gray-50)', textAlign: 'center', padding: '8px 6px' }}
+                            onMouseEnter={() => setHoveredPeriodId(period.id)} onMouseLeave={() => setHoveredPeriodId(null)}>
+                            <span className="fams-badge fams-badge--gray" style={{ fontSize: 9 }}>Free</span>
                           </td>
                         );
-                      }
-
-                      if (isSubstitutedIn) {
-                        return (
-                          <td
-                            key={period.id}
-                            className={`cell-enhanced cell-proxy-in-premium ${hoveredPeriodId === period.id ? 'period-highlighted' : ''}`}
-                            onMouseEnter={() => setHoveredPeriodId(period.id)}
-                            onMouseLeave={() => setHoveredPeriodId(null)}
-                          >
-                            <div className="proxy-label">
-                              <Sparkles size={11} />
-                              PROXY
-                            </div>
-                            <div className="class-title proxy-class">
-                              {isSubstitutedIn.subject}
-                            </div>
-                            <div className="class-meta">
-                              {isSubstitutedIn.classGroup} • {isSubstitutedIn.room}
-                            </div>
-                            <div className="proxy-for">
-                              for {isSubstitutedIn.originalFacultyName.split(' ')[1] || isSubstitutedIn.originalFacultyName}
-                            </div>
-                          </td>
-                        );
-                      }
-
-                      if (regularClass) {
-                        return (
-                          <td
-                            key={period.id}
-                            className={`cell-enhanced cell-regular-premium ${hoveredPeriodId === period.id ? 'period-highlighted' : ''}`}
-                            onMouseEnter={() => setHoveredPeriodId(period.id)}
-                            onMouseLeave={() => setHoveredPeriodId(null)}
-                          >
-                            <div className="class-title">
-                              {regularClass.subject}
-                            </div>
-                            <div className="class-group-display">
-                              {regularClass.classGroup}
-                            </div>
-                            <div className="class-room">
-                              {regularClass.room || 'Room TBA'}
-                            </div>
-                          </td>
-                        );
-                      }
-
-                      return (
-                        <td
-                          key={period.id}
-                          className={`cell-enhanced cell-free-premium ${hoveredPeriodId === period.id ? 'period-highlighted' : ''}`}
-                          onMouseEnter={() => setHoveredPeriodId(period.id)}
-                          onMouseLeave={() => setHoveredPeriodId(null)}
-                        >
-                          <span className="free-period-badge">Free</span>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-

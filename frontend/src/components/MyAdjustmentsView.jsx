@@ -31,7 +31,6 @@ export default function MyAdjustmentsView() {
   if (!currentFaculty) return null;
   const schedule = timetables[currentFaculty.id]?.[selectedDay] || {};
 
-  // Check if this teacher is absent today
   const isAbsent = absences.some(
     a =>
       a.facultyId === currentFaculty.id &&
@@ -39,7 +38,6 @@ export default function MyAdjustmentsView() {
       a.status === 'Approved'
   );
 
-  // Find all adjustments assigned TO this teacher for today (Proxy duties)
   const myProxyDuties = adjustments.filter(
     adj =>
       adj.substituteFacultyId === (currentRole === 'hod' ? currentFaculty.id : user.id) &&
@@ -47,92 +45,103 @@ export default function MyAdjustmentsView() {
   );
 
   return (
-    <div className="my-schedule-container">
-      {/* Header with Faculty Selector */}
-      <div className="page-header flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="page-title flex items-center gap-2">
-            <UserCheck2 className="text-indigo-600" size={24} />
-            <span>Faculty Personal Schedule & Proxy Board</span>
-          </h1>
-          <p className="page-subtitle">
-            View personal daily classes and proxy adjustment duties assigned by the HOD.
-          </p>
-        </div>
-
-        {currentRole === 'hod' && (
-          <div className="flex items-center gap-2">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              Switch Teacher:
-            </label>
-            <select
-              value={currentFaculty.id}
-              onChange={(e) => setCurrentFacultyId(e.target.value)}
-              className="input-select text-sm py-1.5"
-            >
-              {facultyList.map(f => (
-                <option key={f.id} value={f.id}>
-                  {f.name} ({f.designation})
-                </option>
-              ))}
-            </select>
+    <div className="fams-page">
+      {/* Header */}
+      <div className="fams-page-header">
+        <div className="fams-page-header__row">
+          <div>
+            <h1 className="fams-page-title">
+              <UserCheck2 size={24} />
+              <span>Faculty Personal Schedule & Proxy Board</span>
+            </h1>
+            <p className="fams-page-subtitle">
+              View personal daily classes and proxy adjustment duties assigned by the HOD.
+            </p>
           </div>
-        )}
+
+          {currentRole === 'hod' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--fams-gray-500)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Switch Teacher:
+              </label>
+              <select
+                value={currentFaculty.id}
+                onChange={(e) => setCurrentFacultyId(e.target.value)}
+                className="fams-input fams-input--sm"
+                style={{ width: 'auto', minWidth: 200 }}
+              >
+                {facultyList.map(f => (
+                  <option key={f.id} value={f.id}>
+                    {f.name} ({f.designation})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Absent Notice Banner if faculty is on leave */}
+      {/* Absent Notice */}
       {isAbsent && (
-        <div className="p-4 mb-6 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-3">
-          <AlertCircle size={20} className="text-rose-600 shrink-0" />
-          <div className="text-sm text-rose-900">
-            <strong>You are marked on leave for {selectedDay} ({selectedDate}).</strong> Your scheduled classes have been reassigned to substitute teachers.
+        <div className="fams-alert fams-alert--warning" style={{ marginBottom: 20 }}>
+          <div className="fams-alert__icon">
+            <AlertCircle size={20} />
+          </div>
+          <div className="fams-alert__content">
+            <div className="fams-alert__title">You are marked on leave for {selectedDay} ({selectedDate})</div>
+            <div className="fams-alert__desc">Your scheduled classes have been reassigned to substitute teachers.</div>
           </div>
         </div>
       )}
 
-      {/* Proxy Duties Spotlight Banner */}
-      <div className="mb-6">
-        <h2 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
-          <Sparkles size={18} className="text-emerald-600" />
+      {/* Proxy Duties */}
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--fams-gray-900)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Sparkles size={18} style={{ color: 'var(--fams-success)' }} />
           <span>Proxy Adjustments Assigned to You Today ({myProxyDuties.length})</span>
-        </h2>
+        </div>
 
         {myProxyDuties.length === 0 ? (
-          <div className="card p-5 text-center text-slate-500 text-sm">
-            You have no proxy substitution classes assigned for {selectedDay}.
+          <div className="fams-card">
+            <div className="fams-empty" style={{ padding: '32px 16px' }}>
+              <div className="fams-empty__title">No proxy substitution classes</div>
+              <div className="fams-empty__desc">You have no proxy classes assigned for {selectedDay}.</div>
+            </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 14 }}>
             {myProxyDuties.map(duty => {
               const periodMeta = PERIODS.find(p => p.id === duty.periodId);
               return (
-                <div key={duty.id} className="proxy-duty-card">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="badge-tag tag-emerald mb-1">
-                        Lecture {duty.periodId} ({periodMeta?.time})
-                      </span>
-                      <h3 className="font-bold text-slate-900 text-base mt-1">
-                        {duty.subject}
-                      </h3>
-                      <div className="text-xs text-slate-600 flex items-center gap-3 mt-1 font-medium">
-                        <span>Class: {duty.classGroup}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <MapPin size={12} className="text-slate-400" />
-                          {duty.room}
+                <div key={duty.id} className="fams-card" style={{ borderLeft: '3px solid var(--fams-success)' }}>
+                  <div className="fams-card__body" style={{ padding: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                      <div>
+                        <span className="fams-badge fams-badge--green" style={{ marginBottom: 6 }}>
+                          Lecture {duty.periodId} ({periodMeta?.time})
                         </span>
+                        <h3 style={{ fontWeight: 700, fontSize: 15, color: 'var(--fams-gray-900)', marginTop: 6 }}>
+                          {duty.subject}
+                        </h3>
+                        <div style={{ fontSize: 12, color: 'var(--fams-gray-600)', display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+                          <span>Class: {duty.classGroup}</span>
+                          <span>•</span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <MapPin size={12} style={{ color: 'var(--fams-gray-400)' }} />
+                            {duty.room}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mt-3 pt-3 border-t border-emerald-100 flex items-center justify-between text-xs">
-                    <span className="text-slate-500">
-                      Covering for: <strong className="text-slate-800">{duty.originalFacultyName}</strong>
-                    </span>
-                    <span className="text-emerald-700 font-semibold">
-                      Confirmed by HOD
-                    </span>
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid var(--fams-gray-100)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12 }}>
+                      <span style={{ color: 'var(--fams-gray-500)' }}>
+                        Covering for: <strong style={{ color: 'var(--fams-gray-800)' }}>{duty.originalFacultyName}</strong>
+                      </span>
+                      <span style={{ color: 'var(--fams-success)', fontWeight: 600 }}>
+                        Confirmed by HOD
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
@@ -141,85 +150,107 @@ export default function MyAdjustmentsView() {
         )}
       </div>
 
-      {/* Complete 8-Period Day Timeline */}
-      <div className="card">
-        <div className="card-header border-b">
-          <h2 className="card-title text-base flex items-center gap-2">
-            <BookOpen size={16} className="text-indigo-600" />
-            <span>Full 8-Period Timetable for {selectedDay}</span>
-          </h2>
-          <span className="text-xs text-slate-500">
-            {currentFaculty.name} ({currentFaculty.designation})
-          </span>
+      {/* Full 8-Period Timetable */}
+      <div className="fams-card">
+        <div className="fams-card__header">
+          <div>
+            <div className="fams-card__title">
+              <BookOpen size={16} /> Full 8-Period Timetable for {selectedDay}
+            </div>
+            <div className="fams-card__subtitle">
+              {currentFaculty.name} ({currentFaculty.designation})
+            </div>
+          </div>
         </div>
 
-        <div className="card-body p-0">
-          <div className="timeline-periods-list">
-            {PERIODS.map(period => {
-              const regularClass = schedule[period.id];
-              const proxyClass = myProxyDuties.find(d => d.periodId === period.id);
+        <div className="fams-card__body fams-card__body--flush">
+          <div className="fams-table-wrap">
+            <table className="fams-table">
+              <thead>
+                <tr>
+                  <th>Lecture</th>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Subject</th>
+                  <th>Class & Room</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PERIODS.map(period => {
+                  const regularClass = schedule[period.id];
+                  const proxyClass = myProxyDuties.find(d => d.periodId === period.id);
 
-              return (
-                <div
-                  key={period.id}
-                  className={`timeline-period-item ${
-                    proxyClass
-                      ? 'is-proxy'
-                      : regularClass
-                      ? 'is-regular'
-                      : 'is-free'
-                  }`}
-                >
-                  <div className="timeline-time-col">
-                    <span className="timeline-period-num">Lecture {period.id}</span>
-                    <span className="timeline-period-clock">{period.time}</span>
-                  </div>
-
-                  <div className="timeline-content-col">
-                    {proxyClass ? (
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="badge-tag tag-emerald">PROXY CLASS</span>
-                          <span className="font-bold text-slate-900 text-sm">
-                            {proxyClass.subject}
+                  return (
+                    <tr key={period.id} style={proxyClass ? { background: 'var(--fams-success-bg)' } : {}}>
+                      <td>
+                        <div style={{ fontWeight: 600, color: 'var(--fams-gray-800)' }}>
+                          L{period.id}
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 12, color: 'var(--fams-gray-500)' }}>{period.time}</span>
+                      </td>
+                      <td>
+                        {proxyClass ? (
+                          <span className="fams-badge fams-badge--green">Proxy Duty</span>
+                        ) : regularClass ? (
+                          <span className="fams-badge fams-badge--gray">Regular</span>
+                        ) : (
+                          <span className="fams-badge fams-badge--teal">Free</span>
+                        )}
+                      </td>
+                      <td>
+                        {proxyClass ? (
+                          <div>
+                            <div style={{ fontWeight: 600, color: 'var(--fams-gray-900)', fontSize: 13 }}>
+                              {proxyClass.subject}
+                            </div>
+                            <div style={{ fontSize: 11, color: 'var(--fams-gray-500)', marginTop: 1 }}>
+                              Covering for {proxyClass.originalFacultyName}
+                            </div>
+                          </div>
+                        ) : regularClass ? (
+                          <span style={{ fontWeight: 500, color: 'var(--fams-gray-800)', fontSize: 13 }}>
+                            {regularClass.subject}
                           </span>
-                        </div>
-                        <div className="text-xs text-slate-600 mt-1">
-                          Class: <strong>{proxyClass.classGroup}</strong> • Room: <strong>{proxyClass.room}</strong> • Covering for <strong>{proxyClass.originalFacultyName}</strong>
-                        </div>
-                      </div>
-                    ) : regularClass ? (
-                      <div>
-                        <div className="font-semibold text-slate-900 text-sm">
-                          {regularClass.subject}
-                        </div>
-                        <div className="text-xs text-slate-500 mt-0.5">
-                          Class: {regularClass.classGroup} • Room: {regularClass.room}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="text-xs text-slate-400 italic">
-                        Free Period — Available for academic work / research / adjustments
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="timeline-badge-col">
-                    {proxyClass ? (
-                      <span className="status-badge status-confirmed">Proxy Duty</span>
-                    ) : regularClass ? (
-                      <span className="badge-tag tag-neutral">Regular Class</span>
-                    ) : (
-                      <span className="badge-tag tag-free">Free Slot</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                        ) : (
+                          <span style={{ fontSize: 12, color: 'var(--fams-gray-400)', fontStyle: 'italic' }}>
+                            Free Period — Available for adjustments
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        {(proxyClass || regularClass) ? (
+                          <div style={{ fontSize: 12 }}>
+                            <span>{(proxyClass || regularClass).classGroup}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 2, color: 'var(--fams-gray-500)' }}>
+                              <MapPin size={11} /> {(proxyClass || regularClass).room || 'TBD'}
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--fams-gray-400)' }}>—</span>
+                        )}
+                      </td>
+                      <td>
+                        {proxyClass ? (
+                          <span className="fams-badge fams-badge--green">
+                            <Sparkles size={11} /> Confirmed
+                          </span>
+                        ) : regularClass ? (
+                          <span style={{ fontSize: 12, color: 'var(--fams-gray-500)' }}>Scheduled</span>
+                        ) : (
+                          <span style={{ fontSize: 12, color: 'var(--fams-gray-400)' }}>Available</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

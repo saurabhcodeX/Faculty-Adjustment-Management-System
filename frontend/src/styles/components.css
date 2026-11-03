@@ -708,6 +708,234 @@
   font-weight: 600;
 }
 
+/* ── Page Layout ── */
+.fams-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.fams-page-header {
+  margin-bottom: 24px;
+}
+
+.fams-page-header__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.fams-page-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--fams-gray-900);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.3;
+}
+
+.fams-page-title svg {
+  color: var(--fams-blue);
+  flex-shrink: 0;
+}
+
+.fams-page-subtitle {
+  font-size: 13px;
+  color: var(--fams-gray-500);
+  margin-top: 4px;
+  max-width: 600px;
+  line-height: 1.5;
+}
+
+/* ── Filter Pills ── */
+.fams-filter-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.fams-filter-pill {
+  padding: 7px 16px;
+  border-radius: 50px;
+  border: 1px solid var(--fams-gray-200);
+  background: var(--fams-white);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fams-gray-600);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--fams-transition);
+  font-family: var(--fams-font);
+  white-space: nowrap;
+}
+
+.fams-filter-pill:hover {
+  border-color: var(--fams-gray-400);
+  background: var(--fams-gray-50);
+}
+
+.fams-filter-pill--active {
+  background: var(--fams-blue);
+  color: #fff;
+  border-color: var(--fams-blue);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
+}
+
+.fams-filter-pill__count {
+  background: rgba(0, 0, 0, 0.08);
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+}
+
+.fams-filter-pill--active .fams-filter-pill__count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Form Fields ── */
+.fams-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .fams-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fams-form-field {
+  margin-bottom: 16px;
+}
+
+.fams-field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--fams-gray-600);
+  margin-bottom: 6px;
+}
+
+.fams-field-label svg {
+  color: var(--fams-gray-400);
+  flex-shrink: 0;
+}
+
+.fams-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--fams-gray-300);
+  border-radius: var(--fams-radius-sm);
+  font-size: 13px;
+  font-family: var(--fams-font);
+  color: var(--fams-gray-800);
+  background: var(--fams-white);
+  transition: border-color var(--fams-transition), box-shadow var(--fams-transition);
+}
+
+.fams-input:focus {
+  outline: none;
+  border-color: var(--fams-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.fams-input::placeholder {
+  color: var(--fams-gray-400);
+}
+
+.fams-input--sm {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.fams-input:disabled {
+  background: var(--fams-gray-50);
+  color: var(--fams-gray-500);
+  cursor: not-allowed;
+}
+
+.fams-textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.fams-field-hint {
+  font-size: 11px;
+  color: var(--fams-gray-400);
+  margin-top: 4px;
+}
+
+.fams-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 640px) {
+  .fams-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Callout / Info Box ── */
+.fams-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--fams-info-bg);
+  border: 1px solid var(--fams-info-border);
+  border-radius: var(--fams-radius-sm);
+  font-size: 12px;
+  color: #1e40af;
+  margin-top: 16px;
+}
+
+.fams-callout svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* ── Avatar ── */
+.fams-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--fams-info-bg);
+  color: var(--fams-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fams-avatar--sm {
+  width: 32px;
+  height: 32px;
+}
+
+/* ── Spacing utilities ── */
+.fams-mb-0 { margin-bottom: 0; }
+.fams-mb-2 { margin-bottom: 8px; }
+.fams-mb-4 { margin-bottom: 16px; }
+.fams-mb-6 { margin-bottom: 24px; }
+.fams-mt-4 { margin-top: 16px; }
+.fams-mt-6 { margin-top: 24px; }
+.fams-gap-4 { gap: 16px; }
+.fams-gap-6 { gap: 24px; }
+
 /* ── Responsive Helpers ── */
 @media (max-width: 768px) {
   .fams-stats-grid {
